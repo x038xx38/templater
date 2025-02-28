@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+      {% block title %}<title>Templater | Личный кабинет пользователя</title>{% endblock %}
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+      <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+      <!-- Добавление дополнительного статического CSS файла -->
+      {% load static %}
+      <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+      <link rel="stylesheet" href="{% static 'app/multi-form/css/multi-style.css' %}">
+
+
+  </head>
+  <body>
+		<div class="wrapper d-flex align-items-stretch">
+			<nav id="sidebar">
+                <div class="p-4 pt-5">
+                    <a href="#" class="img logo rounded-circle mb-5" style="background-image: url({% static 'images/logo.jpg' %});"></a>
+                <ul class="list-unstyled components mb-5">
+                  <li>
+                      <a href="{%url 'app:summary'%}">СВОДКА</a>
+                  </li>
+                  <li>
+                      <a href="#docSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">ШАБЛОНЫ</a>
+                      <ul class="collapse list-unstyled" id="docSubmenu">
+                        <li>
+                            <a href="{%url 'app:summary'%}">Протокол</a>
+                        </li>
+                        <li>
+                            <a href="{%url 'app:doc'%}">Исковое заявление</a>
+                        </li>
+                      </ul>
+
+                  </li>
+                    <li>
+                      <a href="#settSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">НАСТРОЙКИ</a>
+                      <ul class="collapse list-unstyled" id="settSubmenu">
+                        <li>
+                            <a href="{%url 'app:main_settings'%}">Организации</a>
+                        </li>
+                        <li>
+                            <a href="{%url 'app:member'%}">Члены товарищества</a>
+                        </li>
+                      </ul>
+                    </li>
+                </ul>
+
+	            <div class="footer"></div>
+
+              </div>
+            </nav>
+
+            <!-- Page Content  -->
+            <div id="content" class="p-4 p-md-5">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+              <div class="container-fluid">
+
+                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                  <i class="fa fa-bars"></i>
+                  <span class="sr-only">Toggle Menu</span>
+                </button>
+                <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fa fa-bars"></i>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul class="nav navbar-nav ml-auto">
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                            <a class="nav-link" href="{% url 'logout'%}?next=/site/">выйти</a>
+                        {% else %}
+                            <a class="nav-link" href="#">войти</a>
+                        {% endif %}
+
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+
+            {% load crispy_forms_tags %}
+            <div class="container" style="width: 1000px;">
+            <h3>Шаблон искового заявления</h3>
+                <p>{{ body }}</p>
+            <!-- JQUERY STEP -->
+            <div class="wrapper">
+                <form id="form" method="post" action="{% url 'app:doc' %}">
+                    {% csrf_token %}
+                    <div id="wizard">
+                        <!-- SECTION 1 -->
+                        <h4></h4>
+                        <section>
+                            <div class="form-row">
+                                <div class="col">
+                                  {{ form_isk_template.org_name|as_crispy_field }}
+                                </div>
+                                <div class="col">
+                                  {{ form_isk_template.org_full_address|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                  {{ form_isk_template.org_inn|as_crispy_field }}
+                                </div>
+                                <div class="col">
+                                  {{ form_isk_template.org_ogrn|as_crispy_field }}
+                                </div>
+                            </div>
+                                {{ form_isk_template.agent_name|as_crispy_field }}
+                            <div class="form-row">
+                                <div class="col">
+                                  {{ form_isk_template.agent_address|as_crispy_field }}
+                                </div>
+                                <div class="col">
+                                  {{ form_isk_template.agent_phone|as_crispy_field }}
+                                </div>
+                            </div>
+                        </section>
+                        <!-- SECTION 2 -->
+                        <h4></h4>
+                        <section>
+                            {{ form_isk_template.bank_name|as_crispy_field }}
+                            <div class="form-row">
+                                <div class="col">
+                                  {{ form_isk_template.bank_bik|as_crispy_field }}
+                                </div>
+                                <div class="col">
+                                  {{ form_isk_template.bank_inn|as_crispy_field }}
+                                </div>
+                                <div class="col">
+                                  {{ form_isk_template.bank_kpp|as_crispy_field }}
+                                </div>
+                            </div>
+                            {{ form_isk_template.bank_correspondent_acc|as_crispy_field }}
+                        </section>
+                        <!-- SECTION 3 -->
+                        <h4></h4>
+                        <section>
+                            <div class="container">
+                              <div class="row">
+                                <div class="col-12">
+                                  <table class="table table-bordered">
+                                    <thead>
+                                      <tr>
+                                        <th scope="col"></th>
+                                        <th scope="col">ФИО</th>
+                                        <th scope="col">Адрес</th>
+                                        <th scope="col">Кадастровый номер</th>
+                                        <th scope="col">Долг</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                    {%  for item in members %}
+                                        <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                              <input name="agent_id"  value="{{ item.id }}" type="checkbox" class="custom-control-input" id="custom_{{ item.id }}">
+                                              <label class="custom-control-label" for="custom_{{ item.id }}"></label>
+                                            </div>
+                                        </td>
+                                        <td>{{ item.fio_member }}</td>
+                                        <td>{{ item.address_member }}</td>
+                                        <td>{{ item.kadastr }}</td>
+                                        <td>{{ item.credit }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                        </section>
+                        <!-- SECTION 4 -->
+                        <h4></h4>
+                        <section>
+                        </section>
+                    </div>
+                </form>
+            </div>
+            </div>
+
+
+
+            </div>
+        </div>
+
+
+
+        <script src="{% static 'app/multi-form/js/jquery-3.3.1.min.js' %}"></script>
+        <script src="{% static 'app/js/bootstrap.min.js' %}"></script>
+
+
+        <script src="{% static 'app/multi-form/js/jquery.steps.js' %}"></script>
+        <script src="{% static 'app/multi-form/js/judicial_form.js' %}"></script>
+        <script src="{% static 'app/js/base.js' %}"></script>
+
+
+  </body>
+</html>

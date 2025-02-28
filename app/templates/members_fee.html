@@ -1,0 +1,353 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+{% block content %}
+	<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>{{ header }}</h3>
+		<table id="fee-list" class="table table-sm text-muted table-bordered">
+			<thead>
+				<tr class="text-uppercase text-sm-center">
+							<th>Номер</th>
+							<th>Дата принятия</th>
+							<th>Период действия</th>
+							<th>Тип взноса</th>
+							<th>Размер взноса</th>
+							<th style="width: 30px;"></th>
+							<th style="width: 30px;"></th>
+						</tr>
+			</thead>
+			<tbody>
+			{% for data in fee %}
+				<tr id="{{ data.id }}">
+					<td>{{ data.num_doc }}</td>
+					<td>{{ data.date_doc|date:"d.m.Y" }}</td>
+					<td>{{ data.date_start|date:"d.m.Y" }} - {{ data.date_finish|date:"d.m.Y" }}</td>
+					<td style="text-align: center">{{ data.get_type_fee_display }}</td>
+					<td style="text-align: right">{{ data.amount_fee }} руб.</td>
+					<td style="text-align: center">
+						<span data-toggle="modal" data-target="#modal-description-fee">
+							<a href="#" title="Подробная информация" data-toggle="tooltip" >
+							<span id="btn-descripton-fee"><i class="far fa-window-maximize"></i></span></a></span></td>
+					<td style="text-align: center">
+						<span data-toggle="modal" data-target="#modal-delete">
+						<a href="#" title="Удалить запись" data-toggle="tooltip">
+							<span id="btn-delete-fee"><i class="far fa-trash-alt"></i></span></a></span></td>
+				</tr>
+			{%  endfor %}
+			</tbody>
+		</table>
+	</div>
+	<div id="modal-delete" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header border-bottom-0">
+					<h5 class="modal-title"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<span aria-hidden="true"><i class="fas fa-times"></i></span>
+				</button>
+				</div>
+				<div class="modal-body text-center mt-4 mb-4">
+					<h5>Вы действительно хотите удалить запись?</h5>
+				</div>
+				<div class="modal-footer border-top-0">
+					<button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+					<button type="button" class="btn btn-primary float-right" style="width: 120px;" id="btn-modal-yes">Да</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="modal-create-fee" class="modal modal_outer second_modal fade" tabindex="-1" role="dialog"
+		 aria-labelledby="modal-create-fee" aria-hidden="true">
+		<div class="modal-dialog">
+			<form id="form-create-fee" method="POST" action="/app/fee/add" enctype="multipart/form-data">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title">Новая запись</h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						{% crispy fee_form %}
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+							<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+						<button type="submit" class="btn btn-primary" name="btn-create-fee-save" id="btn-create-fee-save">
+							<i class="fas fa-save"></i>&nbsp;&nbsp;Сохранить</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="modal modal_outer first_modal fade" id="modal-description-fee" tabindex="-1" role="dialog"
+		 aria-labelledby="modal-description-fee" aria-hidden="true">
+		<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title">Номер протокола - № <span id="title-num-doc"></span></h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						<div class="card-box">
+							<!-- Info -->
+							<div class="card mb-4">
+								<div class="card-body">
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Номер протокола: </div>
+										<div class="col-md-8" id="num_doc"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Дата составления: </div>
+										<div class="col-md-8" id="date_doc"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Период действия: </div>
+										<div class="col-md-8" id="period"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Тип взноса: </div>
+										<div class="col-md-8" id="type_fee"></div>
+									</div>
+									<div id="additional_value"></div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Размер взноса: </div>
+										<div class="col-md-8" id="fee_amount"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Приложение: </div>
+										<div class="col-md-8" id="file_attach"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Комментарий: </div>
+										<div class="col-md-8" id="comment"></div>
+									</div>
+								</div>
+							</div>
+							<!-- / Info -->
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+							<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+						<button type="button" class="btn btn-primary" name="btn-description-fee-edit" id="btn-description-fee-edit">
+							<i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button>
+					</div>
+				</div>
+		</div>
+	</div>
+	<div id="modal-alert" class="modal fade alert-msg" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header border-bottom-0">
+					<h5 class="modal-title"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<span aria-hidden="true"><i class="fas fa-times"></i></span>
+				</button>
+				</div>
+				<div class="modal-body text-center mt-4 mb-4">
+					<span id="error-msg"></span>
+				</div>
+				<div class="modal-footer border-top-0">
+					<button type="button" class="btn btn-primary float-center" style="width: 120px;" id="btn-modal-alert-yes">Ок</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block scripts %}
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<script>
+		$.datepicker.regional['ru'] = {
+			monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+			dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+			dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+			dateFormat: 'dd.mm.yy',
+			firstDay: 1,
+			{#isRTL: false,#}
+			showMonthAfterYear: false,
+			{#yearSuffix: ''#}
+		 };
+		$.datepicker.setDefaults($.datepicker.regional['ru']);
+		$(document).ready(function () {
+			$('#fee-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-10'><'col-sm-12 col-md-2'B>>" +
+							"<'row'<'col-sm-12'tr>>",
+				language: {
+      		emptyTable: "Нет записей в справочнике"
+    		},
+				buttons: [{
+					text: '<span title=\'Новая запись\' data-toggle=\'tooltip\'>' +
+							'<i class=\'fas fa-plus-circle\'> </i>  Создать протокол</span>',
+					className: 'btn btn-primary btn-sm float-right',
+					attr: {
+							'data-toggle': 'modal',
+							'data-target': '#modal-create-fee',
+						}
+				}],
+				ordering: false,
+			});
+			$('[data-toggle="tooltip"]').tooltip();
+			$('#id_date_doc, #id_date_start, #id_date_finish, #id_date_finish_pay').datepicker({
+				dateFormat: 'dd.mm.yy'
+			 });
+			$('#id_day_accrual').datepicker({
+				dayNamesMin: ['','','','','','',''],
+				dateFormat: 'dd',
+				minDate: new Date(2019, 6, 1),
+    		maxDate: new Date(2019, 6, 31),
+				startDate: new Date(2019, 6, 1),
+			}).focus(function() {
+					// $(".ui-datepicker-prev, .ui-datepicker-next").remove();
+					$(".ui-datepicker-header").remove();
+			});
+			let edit_data = ''
+			$('tr #btn-descripton-fee').on('click', function (){
+				let id_fee = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/fee/' + id_fee + '/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						let dateDoc = new Date(Date.parse(data.date_doc));
+						let dateStart = new Date(Date.parse(data.date_start));
+						let dateFinish = new Date(Date.parse(data.date_finish));
+
+						$('#title-num-doc').text(data.num_doc);
+						$('.card-body #num_doc').text(data.num_doc);
+						$('.card-body #date_doc').text($.datepicker.formatDate('d MM yy', dateDoc));
+						$('.card-body #period').text('c ' + $.datepicker.formatDate('d MM yy', dateStart) +
+																					' по ' + $.datepicker.formatDate('d MM yy', dateFinish));
+						let html = ' '
+						if (data.type_fee == '0') {
+								html = `
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Период начисления: </div>
+										<div class="col-md-8" id="payment_period">${data.payment_period_value}</div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">День начисления: </div>
+										<div class="col-md-8" id="day_accrual">${data.day_accrual}</div>
+									</div>`
+                $('#additional_value').html(html)
+						}
+						if (data.type_fee == '1') {
+								html = `
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Цель взноса: </div>
+										<div class="col-md-8" id="obj_fee">${data.obj_fee}</div>
+									</div>`
+                $('#additional_value').html(html)
+						}
+						$('.card-body #type_fee').text(data.type_fee_value);
+						$('.card-body #fee_amount').text(data.amount_fee + ' руб.');
+						$('.card-body #file_attach').html('<a href="{{ MEDIA_URL }}'+data.attachment+'" download> '+data.attachment.split("/")[1]+'</a>');
+						$('.card-body #comment').text(data.comment);
+						return edit_data=data;
+					},
+				});
+			});
+			$('#btn-description-fee-edit').on('click', function (){
+				let dateDoc = new Date(Date.parse(edit_data.date_doc));
+				let dateStart = new Date(Date.parse(edit_data.date_start));
+				let dateFinish = new Date(Date.parse(edit_data.date_finish));
+				$('#form-create-fee input[name="num_doc"]').val(edit_data.num_doc);
+				$('#form-create-fee input[name="date_doc"]').val($.datepicker.formatDate('dd.mm.yy', dateDoc));
+				$('#form-create-fee input[name="date_start"]').val($.datepicker.formatDate('dd.mm.yy', dateStart));
+				$('#form-create-fee input[name="date_finish"]').val($.datepicker.formatDate('dd.mm.yy', dateFinish));
+				$('#form-create-fee select[name="type_fee"]').val(edit_data.type_fee).change();
+				$('#form-create-fee input[name="amount_fee"]').val(edit_data.amount_fee);
+				$('#form-create-fee input[name="day_accrual"]').val(edit_data.day_accrual);
+				$('#form-create-fee .custom-file-label').text(edit_data.attachment);
+				$('#form-create-fee textarea[name="comment"]').val(edit_data.comment)
+				$('<input>').attr({type: 'hidden', id: 'id_fee', name: 'id_fee', value: edit_data.id}).appendTo('#form-create-fee');
+				$('#modal-create-fee').modal('show');
+			});
+			$('tr #btn-delete-fee').on('click', function (){
+				let id_fee = $(this).closest('tr').attr('id');
+				$('#btn-modal-yes').on('click', function() {
+						$.get('/app/fee/' + id_fee + '/del', function(data){
+							console.log(data);
+							window.location.href = '{% url 'app:members_fee' %}'
+						});
+				 });
+			});
+
+			{#$('.section_1').hide();#}
+			$('.section_2').hide();
+		 	$('#id_type_fee').change(function () {
+         $('.section_1').hide();
+         $('.section_2').hide();
+         if (this.options[this.selectedIndex].value == '0') {
+             $('.section_1').show();
+         }
+				 if (this.options[this.selectedIndex].value == '1') {
+             $('.section_2').show();
+         }
+     });
+			$('#form-create-fee').submit(function(event) {
+			let fd = new FormData();
+			let file_data = $('input[type="file"]')[0].files; // for multiple files
+			for(let i = 0;i<file_data.length;i++){
+    		fd.append('attachment', file_data[i]);
+			}
+			let other_data = $('form').serializeArray();
+			$.each(other_data,function(key,input){
+    		fd.append(input.name,input.value);
+			});
+
+			$.ajax({
+    		url: $(this).attr('action'),
+    		data: fd,
+    		contentType: false,
+    		processData: false,
+    		type: $(this).attr('method'),
+    		success: function(data){
+					console.log('Response - ' + data.data);
+					$('#modal-create-fee').modal('hide');
+					window.location.href = '{% url 'app:members_fee' %}'
+    		},
+				error: function (data){
+					console.log('Response error - ' + data.responseJSON.error);
+					console.log('Response data - ' + data.responseJSON.body);
+					$('#error-msg').html(data.responseJSON.error + '<br>Сравните данные с документом: ' + data.responseJSON.body)
+					$('#modal-alert').modal('show');
+				}
+			});
+
+				 /*
+					$.ajax({
+						type: $(this).attr('method'),
+						url: $(this).attr('action'),
+						data: $(this).serialize(),
+						success: function(data) {
+							console.log('Response - ' + data.data);
+							$('#modal-create-fee').modal('hide');
+							window.location.href = '{% url 'app:members_fee' %}'
+						},
+						error: function(data){
+                console.log('Response error - ' + data.responseJSON.error);
+                console.log('Response data - ' + data.responseJSON.body);
+              $('#error-msg').html(data.responseJSON.error + '<br>Сравните данные с документом: ' + data.responseJSON.body)
+							$('#modal-alert').modal('show');
+						}
+					})
+					*/
+					event.preventDefault();
+				});
+			$('#btn-modal-alert-yes').on('click', function() {
+					 $('#modal-alert').modal('hide');
+			 });
+		});
+	</script>
+{% endblock %}

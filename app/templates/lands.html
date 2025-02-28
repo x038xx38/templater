@@ -1,0 +1,693 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block styles %}
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+{% block content %}
+	<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>{{ header }}</h3>
+		<table id="land-list" class="table mt-4 table-sm text-muted table-bordered">
+			<thead>
+				<tr class="text-uppercase text-sm-center">
+					<th style="width: 30px;">#</th>
+					<th>Кадастровый номер</th>
+					<th>Адрес</th>
+					<th>Владелец</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for data in dataset %}
+			<tr id="{{ data.id }}">
+				<td class="text-sm-center">{{ forloop.counter }}</td>
+				<td>{{ data.kadastr_number }}</td>
+				<td>{{ data.land_address }}</td>
+				<td>
+					{% for row in data.members %}
+						 - {{ row.second_name }} {{ row.first_name }} {{ row.third_name }}<br />
+					{% empty %}
+					{% endfor %}
+				</td>
+				<td class="text-sm-center" style="width: 30px;"><span data-toggle="modal" data-target="#modal-description-land">
+								<a href="#" title="Подробная информация" data-toggle="tooltip" >
+								<span id="btn-description-land"><i class="far fa-window-maximize"></i></span></a></span></td>
+				<td class="text-sm-center" style="width: 30px;"><span data-toggle="modal" data-target="#msg-delete">
+						<a href="#" title="Удалить запись" data-toggle="tooltip">
+							<span id="btn-del-land"><i class="far fa-trash-alt"></i></span></a></span></td>
+			</tr>
+			{%  endfor %}
+		</tbody>
+		</table>
+
+		<div class="modal fade" id="msg-delete" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header border-bottom-0">
+						<h5 class="modal-title"></h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body text-center mt-4 mb-4">
+						<h5>Вы действительно хотите удалить запись?</h5>
+					</div>
+					<div class="modal-footer border-top-0">
+						<button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+						<button type="button" class="btn btn-primary float-right" style="width: 120px;" id="modal-yes">Да</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal modal_outer first_modal fade" id="modal-add-land" tabindex="-1" role="dialog"
+				 aria-labelledby="modal-add-land" aria-hidden="true" >
+			<div class="modal-dialog">
+				<form method="post" action="/app/land/add" id="form-add-land" name="form-add-land">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3 class="modal-title">Новый участок</h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+						<div class="modal-body">
+							{% crispy form_land %}
+							<div class="row mt-3">
+								<div class="col">
+									<h4>Физические лица</h4>
+								</div>
+								<div class="col-auto">
+									<span title="Добавить физ. лицо" data-toggle="tooltip">
+									<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-add-member">
+										<i class="fas fa-plus-circle"></i>
+									</button></span>
+									<div class="dropdown">
+										<span title="Прикрепить физ. лицо" data-toggle="tooltip">
+										<button name="bind-new" id="bind-new" class="btn btn-primary btn-sm">
+												<i class="fas fa-link"></i>
+										</button></span>
+										<div id="myDropdown" class="dropdown-content">
+												<input class="form-control border m-2 w-auto" type="text" placeholder="Поиск ..."
+															 id="myInput" onkeyup="filterFunction()">
+										</div>
+									</div>
+								</div>
+							</div>
+							<table id="land-member-list" class="table table-sm text-muted">
+							<thead>
+								<tr class="text-sm-center">
+									<th>ФИО</th>
+									<th>Дата владения</th>
+									<th></th><th></th>
+								</tr>
+							</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+							<button type="button" class="btn btn-primary" id="btn-add-land">Сохранить</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="modal modal_outer second_modal fade" id="modal-add-member" tabindex="-1" role="dialog"
+				 aria-labelledby="modal-add-member" aria-hidden="true">
+			<div class="modal-dialog">
+				<form method="post" action="/app/member/add" id="form-add-member" name="form-add-member">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3 class="modal-title">Новое физическое лицо</h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+						<div class="modal-body">
+							{% crispy form_member %}
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+							<button type="button" class="btn btn-primary" id="btn-add-member">Сохранить</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="modal modal_outer first_modal fade" id="modal-description-land" tabindex="-1" role="dialog"
+				 aria-labelledby="modal-description-land" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3 class="modal-title">Номер участка: <span id="title-number"></span></h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i></button>
+						</div>
+						<div class="modal-body">
+							<div class="card-box">
+								<div class="card mb-4">
+									<div class="card-body">
+										<div class="row mb-2">
+											<div class="col-md-4 text-muted font-weight-bold">Номер участка: </div>
+											<div class="col-md-8" id="number"></div>
+										</div>
+										<div class="row mb-2">
+											<div class="col-md-4 text-muted font-weight-bold">Кадастровый номер: </div>
+											<div class="col-md-8" id="kadastr_number"></div>
+										</div>
+										<div class="row mb-2">
+											<div class="col-md-4 text-muted font-weight-bold">Адрес участка: </div>
+											<div class="col-md-8" id="land_address"></div>
+										</div>
+										<div class="row mb-2">
+											<div class="col-md-4 text-muted font-weight-bold">Комментарий: </div>
+											<div class="col-md-8" id="comment"></div>
+										</div>
+										<div class="row mb-2">
+											<div class="col-md-4 text-muted font-weight-bold">Приложение: </div>
+											<div class="col-md-8" id="attachment"></div>
+										</div>
+									</div>
+								</div>
+								<div id="accordion">
+
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+								<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+							<button type="button" class="btn btn-primary" name="btn-description-land-edit" id="btn-description-land-edit">
+								<i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		<div class="modal modal_outer second_modal fade" id="modal-add-ownership" tabindex="-1" role="dialog"
+				 aria-labelledby="modal-add-ownership" aria-hidden="true">
+			<div class="modal-dialog">
+				<form method="post" id="form-add-ownership" name="form-add-ownership">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3 class="modal-title">Дополнительная информация по участку</h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+						<div class="modal-body">
+							{% crispy form_ownership %}
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+							<button type="submit" class="btn btn-primary" id="btn-add-ownership">Сохранить</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block scripts %}
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/plug-ins/1.11.4/api/row().show().js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<script src="{% static 'app/multi-form/js/ahunter_suggest.js' %}"></script>
+	<script>
+		$.datepicker.regional['ru'] = {
+        closeText: 'Закрыть',
+        prevText: 'Предыдущий',
+        nextText: 'Следующий',
+        currentText: 'Сегодня',
+        monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+        dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+        dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+        dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+        weekHeader: 'Не',
+        dateFormat: 'dd.mm.yy',
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: ''
+    };
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+
+		$(document).on('click', function (e) {
+			if (e.target != $('.dropdown-content')) {
+					$('.dropdown-content').fadeOut();		// скрываем выпадающий список, при клике в любом месте
+			}
+    });
+    $(document).ready(function () {
+			let land_list_table = $('#land-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-3'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 mt-3'p>>",
+				language: {
+						paginate: {
+							first: "Первая",
+							previous: '<i class="fas fa-angle-double-left"></i>',
+							next: '<i class="fas fa-angle-double-right"></i>',
+							last: "Последняя"
+						},
+						info: "Записи с _START_ до _END_ из _TOTAL_ записей",
+						infoFiltered: "(отфильтровано из _MAX_ записей)",
+						loadingRecords: "Загрузка записей...",
+						zeroRecords: "Записи отсутствуют.",
+						infoEmpty: "",
+						processing: "Подождите...",
+						search: '',
+						lengthMenu: "Показать _MENU_ записей",
+						emptyTable: "Нет записей в справочнике"
+					},
+				buttons: [
+					{
+						text: '<span title=\'Новая запись\' data-toggle=\'tooltip\'>' +
+								'<i class="fas fa-user-plus"></i>&nbsp;&nbsp;Создать</span>',
+						className: 'btn btn-primary btn-sm float-right ml-2',
+						attr: {
+								'data-toggle': 'modal',
+								'data-target': '#modal-add-land',
+							}
+					},
+					{
+						text: '<span title=\'Загрузить данные\' data-toggle=\'tooltip\'>' +
+								'<i class="fas fa-file-upload"></i>&nbsp;&nbsp;Загрузить</span>',
+						className: 'btn btn-primary btn-sm float-right',
+						attr: {
+								'data-toggle': 'modal',
+								'data-target': '#',
+							}
+				}],
+				ordering: true,
+				columnDefs: [{
+					targets: [4, 5],
+					orderable: false
+				}],
+				responsive: true,
+				{#order: [[0, 'asc']]#}
+			});
+			let html = `<div class="input-group"><input class="form-control form-control-sm" id="search-land-list"
+						type="search" placeholder="Поиск" aria-controls="land-list"><span class="input-group-append">
+						<button class="btn btn-sm btn-outline border-left-0 border" type="button">
+						<span class="text-secondary"><i class="fas fa-search"></i></span></button></span></div>`
+			$('.dataTables_filter').html(html)
+			$('#search-land-list').on('keyup', function(){
+					land_list_table.search(this.value).draw();
+			});
+
+      $('#land-member-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+				ordering: false,
+				language: {
+						emptyTable: "Нет собственников",
+					},
+		 	});
+			$('.dataTables_paginate').addClass('pagination-sm');
+			$('[data-toggle="tooltip"]').tooltip();
+
+			$('#add-member').on('click', function() {
+				$('#modal-add-member').modal('show');
+      });
+			$('#btn-add-member').on('click', function() {
+				let form = $('#form-add-member');
+    		let actionUrl = form.attr('action');
+
+				$.ajax({
+					type: 'POST',
+					url: actionUrl,
+					data: form.serialize(), // сериализуем элементы формы
+					dataType: 'json',
+					success: function(data) {
+						console.log(data.data); // ответ сервера в консоль
+					},
+					complete: function () {
+						$('#modal-add-member').modal('hide');
+					}
+				});
+			 });
+			$('#bind-new').on('click', function(e) {
+				$.ajax({
+					url: '/app/member/get',
+					dataType: 'json',
+					success: function (response) {
+						let select = '<input class="form-control border m-2 w-auto" type="text" ' +
+								'placeholder="Поиск ..." id="myInput" onkeyup="filterFunction()">';
+						if (response.members.length > 0) {
+								for (let i = 0; i < response.members.length; i++) {
+										select += '<a href="#" class="row" id="' + response.members[i].id + '">' +
+																response.members[i].fio + '</a>';
+								}
+								$('.dropdown-content').html(select + '</div>');
+						} else {
+								select += '<a href="#" class="row" id="1">Нет физических лиц</a>';
+								$('.dropdown-content').html(select + '</div>');
+						}
+					},
+				});
+				e.stopPropagation();
+				$('.dropdown-content').fadeIn();
+				return false;
+			});
+			// данная функция не позволяет скрыться выпадающему списку
+			// когда клик происходит по полю поиска
+			// по идеии ее нужно объединить со следующей функцией
+			$('.dropdown-content').on('click', function (e) {
+				e.stopPropagation();
+				$('.dropdown-content').fadeIn();
+		 	});
+			$('#myDropdown').on('click', 'a.row', function(){
+				let id = $(this).attr('id');
+
+				$.ajax({
+					url: '/app/member/'+ id +'/get',
+					dataType: 'json',
+					type: 'POST',
+					beforeSend: function (xhr) {
+							xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+							xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+					 },
+					success: function (data){
+						let row = `<tr><td name="ownership_id" hidden></td>
+									<td name="member_id" hidden>${data.id}</td>
+									<td name="member_end_hold" hidden></td>
+									<td name="member_comment" hidden></td>
+									<td name="member_files" hidden></td>
+									<td name="member_fio">${data.second_name} ${data.first_name} ${data.third_name}</td>
+									<td name="member_start_hold"></td>
+									<td class="text-right">
+										<a href="#"><span id="ownership" title="Дополнительная информация" data-toggle="tooltip">
+											<span id=""><i class="far fa-plus-square"></i></span></span></a>
+									</td>
+									<td class="text-right">
+										<a href="#"><span id="trash" title="Удалить собственника" data-toggle="tooltip">
+												<span id="trash"><i class="far fa-trash-alt"></i></span></span></a>
+									</td></tr>`
+
+						let check = $('#land-member-list > tbody > tr:first-child').text().trim();
+						if (check == 'Нет собственников') {
+							$('#land-member-list > tbody > tr:first-child').remove();
+							$('#land-member-list > tbody').append(row);
+						} else {
+							$('#land-member-list > tbody:last-child').append(row);
+						}
+						{#e.stopPropagation();#}
+						{#$('.dropdown-content').fadeOut();#}
+						}
+				 });
+			});
+
+			// удаление вспомогательной записи Ownership
+			$('#land-member-list').on('click', '#trash', function (){
+				//let ownership_id = $(this).closest('tr').find('td:eq(0)').text();
+				//$.get('/app/ownership/' + ownership_id + '/del', function(data){ });
+				$(this).closest('tr').remove();
+			});
+            // редактирование вспомогательной записи Ownership
+			$('#land-member-list').on('click', '#ownership', function() {
+        let member_id = ''
+				let ownership_id = ''
+				let start_hold = ''
+				let end_hold = ''
+				let attachment = ''
+				let comment = ''
+				member_id = $(this).closest('tr').find('td:eq(1)').text()
+				ownership_id = $(this).closest('tr').find('td:eq(0)').text();
+				start_hold = $(this).closest('tr').find('td:eq(6)').text();
+				end_hold = $(this).closest('tr').find('td:eq(2)').text();
+				attachment = $(this).closest('tr').find('td:eq(4)').text();
+				comment = $(this).closest('tr').find('td:eq(3)').text();
+
+				if (ownership_id != ''){
+					$('#form-add-ownership input[name="start_hold"]').val(start_hold);
+					$('#form-add-ownership input[name="end_hold"]').val(end_hold);
+					$('#form-add-ownership input[name="attachment"]').val(attachment);
+					$('#form-add-ownership input[name="comment"]').val(comment);
+				}
+
+				$('#modal-add-ownership').modal('show');
+
+				$('#form-add-ownership').on('click', '#btn-add-ownership', function(e) {
+					e.preventDefault();
+
+					let member_start_hold = $('#form-add-ownership input[name="start_hold"]').val()
+					let member_end_hold = $('#form-add-ownership input[name="end_hold"]').val()
+					let member_attachment = $('#form-add-ownership input[name="attachment"]').val()
+					let member_comment = $('#form-add-ownership input[name="comment"]').val()
+
+					$('#land-member-list tr').each(function(){
+						let currentRow=$(this);
+						let currenId=currentRow.find('td:eq(1)').text();
+								alert('member_id - ' + member_id + 'currentId - ' + currenId)
+						if (member_id == currenId){
+								currentRow.find("td:eq(2)").text(member_end_hold)
+								currentRow.find("td:eq(3)").text(member_comment)
+								currentRow.find("td:eq(4)").text(member_attachment)
+								currentRow.find("td:eq(6)").text(member_start_hold)
+						}
+					});
+
+					member_id = ''
+					$('#modal-add-ownership').modal('hide');
+				});
+
+      });
+
+
+
+			$('#modal-add-member').on('shown.bs.modal', function (e) {
+				$('<input>').attr({
+						type: 'hidden',
+						id: 'id_test',
+						name: 'id_test',
+				}).appendTo('#form-add-land');
+			})
+
+			$('#btn-add-land').on('click', function() {
+				let form = $('#form-add-land');
+
+				let actionUrl = form.attr('action');
+				let member_id = [];
+				let member_start_hold = [];
+				let member_end_hold = [];
+				let member_attachment = [];
+				let member_comment = [];
+
+				$('#land-member-list tr').each(function() {
+					member_id.push($(this).find('td:eq(1)').html())
+					member_start_hold.push($(this).find('td:eq(6)').html())
+					member_end_hold.push($(this).find('td:eq(2)').html())
+					member_attachment.push($(this).find('td:eq(4)').html())
+					member_comment.push($(this).find('td:eq(3)').html())
+				});
+
+				let objLand = {
+					members: member_id,
+					start_hold: member_start_hold,
+					end_hold: member_end_hold,
+					attachment: member_attachment,
+					comment: member_comment
+				}
+				$.ajax({
+					type: 'POST',
+					url: actionUrl,
+					// true в $.param указывает, что должен использоваться традиционный метод сериализации объекта.
+					// Традиционный метод не использует квадратные скобки, когда он встречает одно и то же имя параметра.
+					data: form.serialize() + '&' + decodeURIComponent($.param(objLand, true)),
+					success: function(data) {
+							console.log('Response - ' + data);
+							$('#modal-add-land').modal('hide');
+					},
+					complete: function () {
+					{#$('#modal-add-member').modal('hide');#}
+					window.location.href = '{% url 'app:lands' %}'
+				}
+				});
+				return false;
+			});
+			$('#land-list tbody').on('click', 'tr #btn-del-land', function (e){
+				e.preventDefault();
+				let select_row = land_list_table.row($(this).parents('tr'))
+
+				let id = $(this).closest('tr').attr('id');
+				$('#modal-yes').on('click', function() {
+						$.get('/app/land/' + id + '/del', function(data){});
+						$('#msg-delete').modal('hide');
+						select_row.remove().draw().show().draw(false);
+			 	 });
+			 });
+
+
+			$('#land-list').on('click', 'tr #btn-description-land', function (){
+				let id = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/land/' + id + '/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						$('#title-number').text(data.number);
+						$('.card-body #number').text(data.number);
+						$('.card-body #kadastr_number').text(data.kadastr_number);
+						$('.card-body #land_address').text(data.land_address);
+						$('.card-body #comment').text(data.comment);
+						$('.card-body #attachment').text(data.attachment);
+
+						let list = JSON.parse(data.member_list);
+						let accord = '';
+						for(let i=0; i<list.length; i++) {
+							let html = `<div class="card mb-3">
+									<div class="card-header" id="heading_${list[i].pk}">
+										<h5 class="mb-0">
+											<button class="btn btn-link" data-toggle="collapse" data-target="#collapse_${list[i].pk}"
+															aria-expanded="true" aria-controls="collapseOne">
+												${list[i].fields.second_name} ${list[i].fields.first_name} ${list[i].fields.third_name}
+											</button>
+										</h5>
+									</div>
+									<div id="collapse_${list[i].pk}" class="collapse" aria-labelledby="heading_${list[i].pk}" data-parent="#accordion">
+										<div class="card-body">
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Собственник: </div>
+												<div class="col-md-8" id="fio">${list[i].fields.second_name} ${list[i].fields.first_name} ${list[i].fields.third_name}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Адрес: </div>
+												<div class="col-md-8" id="address">${list[i].fields.address}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Статус: </div>
+												<div class="col-md-8" id="status">${list[i].fields.status}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Телефон: </div>
+												<div class="col-md-8" id="phone">${list[i].fields.phone}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Email: </div>
+												<div class="col-md-8" id="email">${list[i].fields.email}</div>
+											</div>
+										</div>
+									</div>
+								</div>`;
+							accord = accord + html;
+
+						 }
+						$('#accordion').html(accord);
+						{##}
+						{#let ownership = JSON.parse(data.ownership);#}
+            {#for(let i=0; i<ownership.length; i++){#}
+            {#    let row =`		<hr />#}
+						{#																	<div class="row mb-2">#}
+						{#						<div class="col-md-4 text-muted font-weight-bold">В собственности: </div>#}
+						{#						<div class="col-md-8" id="hold">с ${ownership[i].fields.start_hold} по ${ownership[i].fields.end_hold}</div>#}
+						{#					</div>#}
+						{#					<div class="row mb-2">#}
+						{#						<div class="col-md-4 text-muted font-weight-bold">Документы: </div>#}
+						{#						<div class="col-md-8" id="attachment">${ownership[i].fields.attachment}</div>#}
+						{#					</div>#}
+						{#					<div class="row mb-2">#}
+						{#						<div class="col-md-4 text-muted font-weight-bold">Комментарий: </div>#}
+						{#						<div class="col-md-8" id="comment">${ownership[i].fields.comment}</div>#}
+						{#					</div>`;#}
+            {#    let set = `#collapse_${ownership[i].fields.land} .card-body`#}
+								{#alert(set)#}
+						{#		$(set).append(row);#}
+						{# }#}
+						return edit_data=data;
+					},
+				});
+			});
+			$('#btn-description-land-edit').on('click', function (){
+				$('#modal-description-land').modal('hide');
+        $('#modal-add-land .modal-title').text('Редактирование');
+				$('#modal-add-land input[name="number"]').val(edit_data.number);
+				$('#modal-add-land input[name="kadastr_number"]').val(edit_data.kadastr_number);
+				$('#modal-add-land input[name="land_address"]').val(edit_data.land_address);
+				$('#modal-add-land input[name="comment"]').val(edit_data.comment);
+				{#$('#modal-add-land input[name="attachment"]').val(edit_data.attachment);#}
+				$('#modal-add-land input[name="id_land"]').val(edit_data.id);
+
+				let ownership = JSON.parse(edit_data.ownership);
+                console.log('ownership - ' + ownership)
+				let list = JSON.parse(edit_data.member_list);
+                console.log('list - ' + list)
+				let row = '';
+				for(let i=0; i<list.length; i++) {
+					let start_hold = ''
+					let ownership_id = ''
+					for(let j=0; j<ownership.length; j++) {
+              if ((ownership[j].fields.member == list[i].pk ) && (ownership[j].fields.land == edit_data.id)){
+
+									let sh = new Date(Date.parse(ownership[j].fields.start_hold));
+									start_hold = $.datepicker.formatDate('dd.mm.yy', sh)
+
+									let eh = new Date(Date.parse(ownership[j].fields.end_hold));
+									end_hold =  $.datepicker.formatDate('dd.mm.yy', eh)
+
+									comments = ownership[j].fields.comment
+									ownership_id = ownership[j].pk
+									break;
+							}
+          }
+
+				let html = `<tr><td name="ownership_id" hidden>${ownership_id}</td>
+						<td name="member_id" hidden>${list[i].pk}</td>
+						<td name="member_end_hold" hidden>${end_hold}</td>
+						<td name="member_comment" hidden>${comments}</td>
+						<td name="member_files" hidden></td>
+						<td name="member_fio">${list[i].fields.second_name} ${list[i].fields.first_name} ${list[i].fields.third_name}</td>
+						<td name="member_start_hold">${start_hold}</td>
+						<td class="text-right">
+							<a href="#"><span id="ownership" title="Дополнительная информация" data-toggle="tooltip">
+								<span id=""><i class="far fa-plus-square"></i></span></span></a>
+						</td>
+						<td class="text-right">
+							<a href="#"><span id="trash" title="Удалить собственника" data-toggle="tooltip">
+									<span id="trash"><i class="far fa-trash-alt"></i></span></span></a>
+						</td></tr>`
+
+					row = row + html;
+				}
+				$('#land-member-list > tbody').html(row)
+		 		$('#modal-add-land').modal('show');
+			});
+
+			$('#id_start_hold').datepicker({ dateFormat: 'dd.mm.yy' });
+			$('#id_end_hold').datepicker({ dateFormat: 'dd.mm.yy' });
+    });
+
+    function filterFunction() {
+			let input, filter, ul, li, a, i;
+			input = document.getElementById('myInput');
+			filter = input.value.toUpperCase();
+			div = document.getElementById('myDropdown');
+			a = div.getElementsByTagName('a');
+			for (i = 0; i < a.length; i++) {
+				txtValue = a[i].textContent || a[i].innerText;
+				if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						a[i].style.display = '';
+				} else {
+						a[i].style.display = 'none';
+				}
+			}
+    }
+		let modalMember = {
+        id: 'id_address',
+        z_index: '9999',
+        empty_msg: 'Нет совпадений ... ',
+    };
+    AhunterSuggest.Address.Solid(modalMember);
+		let modalLand = {
+        id: 'id_land_address',
+        z_index: '9999',
+        empty_msg: 'Нет совпадений ... ',
+    };
+    AhunterSuggest.Address.Solid(modalLand);
+	</script>
+{% endblock %}

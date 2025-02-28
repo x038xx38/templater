@@ -1,0 +1,646 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block styles %}
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+{% block content %}
+	<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>{{ header }}</h3>
+		<table id="debit-list" class="table table-sm text-muted table-bordered">
+		<thead>
+			<tr class="text-uppercase text-sm-center">
+				<th></th>
+				<th></th>
+				<th>Должник</th>
+				<th>Сумма</th>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for data in dataset %}
+			<tr id="{{ data.pk }}">
+				<td class="text-center"></td>
+				<td>{{ data.pk }}</td>
+				<td>{{ data.second_name }} {{ data.first_name }} {{ data.third_name }}<br /></td>
+				<td>{{ data.lands__debtsmodel__sum__sum|floatformat:2 }}</td>
+				<td class="text-sm-center" style="width: 30px;">
+					<span id="btn-description-debit-list" data-toggle="modal" data-target="#modal-description-debit">
+								<a href="#" title="Подробная информация" data-toggle="tooltip" >
+								<i class="far fa-window-maximize"></i></a></span></td>
+				<td class="text-sm-center" style="width: 30px;">
+					<span data-toggle="modal" data-target="#msg-delete">
+						<a href="#" title="Удалить запись" data-toggle="tooltip">
+							<span id="btn-del-debit-group"><i class="far fa-trash-alt"></i></span></a></span></td>
+			</tr>
+			{%  endfor %}
+		</tbody>
+		</table>
+	</div>
+	<div class="modal modal_outer first_modal fade" id="modal-add-debit" tabindex="-1" role="dialog" aria-labelledby="modal-add-debit" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<form method="post" action="/app/debit/add" id="form-add-debit">
+				<div class="modal-content ">
+					<div class="modal-header">
+						<h3 class="modal-title">Новая задолженность</h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						{% crispy debit_form %}
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+						<button type="submit" class="btn btn-primary" id="btn-add-debit">Сохранить</button>
+					</div>
+				</div>
+		</form>
+		</div>
+	</div>
+	<div class="modal modal_outer first_modal fade" id="modal-description-debit" tabindex="-1" role="dialog"
+			 aria-labelledby="modal-description-debit" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title" id="title-fio">Подробная информация</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="close">
+						<i class="fas fa-times"></i></button>
+				</div>
+				<div class="modal-body">
+					<ul class="nav nav-tabs">
+						<li class="nav-item">
+							<a class="nav-link active" data-toggle="tab" href="#total-tab">ИТОГО</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#accruals-tab">НАЧИСЛЕНИЯ</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#payments-tab">ПЛАТЕЖИ</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#penalties-tab">ПЕНИ</a>
+						</li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane container active" id="total-tab"><br />
+							<!--table id="debit-summary-list" class="display" style="width:100%">
+								<thead>
+									<tr>
+										<th class="w-75"></th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+								<tfoot>
+									<tr>
+										<th style="text-align:right"></th>
+										<th id="summary-total"></th>
+									</tr>
+								</tfoot>
+							</table-->
+						</div>
+						<div class="tab-pane container fade" id="accruals-tab"><br /></div>
+						<div class="tab-pane container fade" id="payments-tab"><br /></div>
+						<div class="tab-pane container fade" id="penalties-tab"><br /></div>
+					</div>
+					<br />
+					<br />
+				</div>
+				<div class="modal-footer">
+					<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+						<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="msg-delete" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header border-bottom-0">
+					<h5 class="modal-title"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body text-center mt-4 mb-4">
+					<h5>Вы действительно хотите удалить запись?</h5>
+				</div>
+				<div class="modal-footer border-top-0">
+					<button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+					<button type="button" class="btn btn-primary float-right" style="width: 120px;" id="modal-yes">Да</button>
+				</div>
+			</div>
+			</div>
+	</div>
+	<div id="modal-alert" class="modal fade alert-msg" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header border-bottom-0">
+				<h5 class="modal-title"></h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="close">
+						<span aria-hidden="true"><i class="fas fa-times"></i></span>
+			</button>
+			</div>
+			<div class="modal-body text-center mt-4 mb-4">
+				<span id="error-msg"></span>
+			</div>
+			<div class="modal-footer border-top-0">
+				<button type="button" class="btn btn-primary float-center" style="width: 120px;" id="btn-modal-alert-yes">Ок</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block scripts %}
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<script>
+    $.datepicker.regional['ru'] = {
+        closeText: 'Закрыть',
+        prevText: 'Предыдущий',
+        nextText: 'Следующий',
+        currentText: 'Сегодня',
+        monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+        dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+        dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+        dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+        weekHeader: 'Не',
+        dateFormat: 'dd.mm.yy',
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: ''
+    };
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+		$(document).ready(function (){
+			let debit_list_table = $('#debit-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-3'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 mt-3'p>>",
+				language: {
+						paginate: {
+							first: "Первая",
+							previous: '<i class="fas fa-angle-double-left"></i>',
+							next: '<i class="fas fa-angle-double-right"></i>',
+							last: "Последняя"
+						},
+						info: "Записи с _START_ до _END_ из _TOTAL_ записей",
+						infoFiltered: "(отфильтровано из _MAX_ записей)",
+						loadingRecords: "Загрузка записей...",
+						zeroRecords: "Записи отсутствуют.",
+						infoEmpty: "",
+						processing: "Подождите...",
+						search: '',
+						lengthMenu: "Показать _MENU_ записей",
+						emptyTable: "Нет записей в справочнике"
+					},
+				buttons: [
+					{
+						text: '<span title=\'Новая запись\' data-toggle=\'tooltip\'>' +
+								'<i class="far fa-credit-card"></i></i>&nbsp;&nbsp;Создать</span>',
+						className: 'btn btn-primary btn-sm float-right ml-2',
+						attr: {
+								'data-toggle': 'modal',
+								'data-target': '#modal-add-debit',
+							}
+					},
+					{#{#}
+					{#	text: '<span title=\'Загрузить данные\' data-toggle=\'tooltip\'>' +#}
+					{#			'<i class="fas fa-file-upload"></i>&nbsp;&nbsp;Загрузить</span>',#}
+					{#	className: 'btn btn-primary btn-sm float-right',#}
+					{#	attr: {#}
+					{#			'data-toggle': 'modal',#}
+					{#			'data-target': '#',#}
+					{#		}#}
+					{# }#}
+				],
+				columns: [
+					{
+            className:      'details-control',
+            orderable:      false,
+            data:           null,
+            defaultContent: '',
+						render: function () {
+							return '<i class="fa fa-plus-square" aria-hidden="true"></i>';
+						},
+						width: 					'25px'
+        	},
+					{ data: 'id', visible: false },
+					{	data: 'name' },
+					{ data: 'sum' },
+					null,
+					null,
+				],
+				ordering: false,
+
+			});
+			$('#debit-list tbody').on('click', 'td.details-control', function () {
+    		let tr = $(this).closest('tr');
+				let tdi = $(this).find('i.fa');
+    		let row = debit_list_table.row( tr );
+
+				if ( row.child.isShown() ) {
+					row.child.hide();
+					tr.removeClass('shown');
+					tdi.first().removeClass('fa-minus-square');
+					tdi.first().addClass('fa-plus-square');
+				}
+    		else {
+					row.child( format(row.data()) ).show();
+					tr.addClass('shown');
+					tdi.first().removeClass('fa-plus-square');
+					tdi.first().addClass('fa-minus-square');
+				}
+			});
+			function format ( rowData ) {
+    		let div = $('<div/>').addClass( 'loading' ).text( 'Загрузка...' );
+				$.ajax({
+					url: '/app/debt/' + rowData.id,
+					dataType: 'json',
+					success: function (response) {
+						console.log(response.data.length);
+						let table='<table class="w-100 border"><tbody>';
+						if (response.data.length === 0) {
+							table += '<tr><td></td><td></td><td>0</td><td></td><td></td><td></td></tr>'
+						} else {
+							for (let i = 0; i < response.data.length; i++) {
+								table += `<tr id="${response.data[i].id}">
+									<td>${response.data[i].land__land_address}</td>
+									<td>${response.data[i].start_debt} - ${response.data[i].end_debt}</td>
+									<td>${response.data[i].type_accuals}</td>
+									<td>${response.data[i].sum}</td>
+									<td class="text-center" style="width: 30px;"><span id="btn-description-debit" data-toggle="modal" data-target="#modal-description-debit">
+									<a href="#" title="Подробная информация" data-toggle="tooltip" >
+									<i class="far fa-window-maximize"></i></a></span></td>
+									<td class="text-center" style="width: 30px;"><span id="btn-edit-debit" data-toggle="modal" data-target="#modal-edit-debit">
+									<a href="#" title="Редактировать запись" data-toggle="tooltip">
+									<i class="far fa-edit"></i></a></span></td>
+									<td class="text-center" style="width: 30px;"><a href="#" title="Удалить запись" data-toggle="tooltip">
+							<span id="btn-del-debit"><i class="far fa-trash-alt"></i></span></a></span></td>
+								</tr>`;
+							};
+						};
+
+						table += '</tbody></table>'
+						div.html(table).removeClass('loading');
+					}
+				 });
+
+				return div;
+			}
+
+			let summaryList = $('#debit-summary-list ').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+				ordering: false,
+				columnDefs: [{
+						targets: 1,
+						render: $.fn.dataTable.render.number(' ', '.', 2, ''),
+						className: 'text-right'
+					}
+				],
+				footerCallback: function(row, data, start, end, display) {
+					var api = this.api();
+					$(api.column(0).footer()).html('Итого: ');
+				},
+			 });
+
+			let input_search = `<div class="input-group">
+					<input class="form-control form-control-sm" id="search-debit-list" type="search" placeholder="Поиск"
+									aria-controls="debit-list"><span class="input-group-append">
+					<button class="btn btn-sm btn-outline border-left-0 border" type="button">
+					<span class="text-secondary"><i class="fas fa-search"></i></span></button></span></div>`
+
+			$('.dataTables_filter').html(input_search)
+			$('#search-debit-list').on('keyup', function (){
+					debit_list_table.search(this.value).draw();
+			});
+			$('.dataTables_paginate').addClass('pagination-sm');
+			$('[data-toggle="tooltip"]').tooltip();
+			$('#id_start_debt').datepicker({ dateFormat: 'dd.mm.yy' });
+			$('#id_end_debt').datepicker({dateFormat: 'dd.mm.yy',}).datepicker("setDate", new Date()).datepicker('disable');
+			$('input[name="type_accuals"]').change(function(){
+    		if ($(this).val() === '1') {
+					$('#id_end_debt').datepicker({dateFormat: 'dd.mm.yy',})
+							.datepicker("setDate", '').datepicker('enable');
+				}
+				if ($(this).val() === '0') {
+					$('#id_end_debt').datepicker({dateFormat: 'dd.mm.yy',})
+							.datepicker("setDate", new Date()).datepicker('disable');
+				}
+			});
+
+			debit_list_table.on('click', 'tr #btn-description-debit', function (){
+				let id_debit = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/debit/' + id_debit + '/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						summaryList.row.add(['Сумма начислений: ', data.total_accruals]).draw();
+						summaryList.row.add(['Сумма платежей: ', data.total_payments]).draw();
+						summaryList.row.add(['Сумма начисленных пени: ', data.total_penalties]).draw();
+						let sum = 0;
+						summaryList.rows().every( function () {
+								let r = this.index();
+								let d = this.data();
+								if (r === 1) {
+									sum = sum - parseFloat(d[1])
+								} else {
+									sum = sum + parseFloat(d[1])
+								}
+						} );
+						$('#summary-total').html($.fn.dataTable.render.number(' ', '.', 2, '').display(sum));
+
+						for (let i = 0; i < data.list_accruals.length; i++) {
+							let date = new Date(Date.parse(data.list_accruals[i]['date_start']));
+							let date_end = new Date(Date.parse(data.list_accruals[i]['date_finish']));
+							let date_str = ' - ';
+							if (data.list_accruals[i]['type_num'] === '0') {
+									date_str = $.datepicker.formatDate('dd.mm.yy', date) + ' - ' + $.datepicker.formatDate('dd.mm.yy', date_end);
+							} else {
+									date_str =  $.datepicker.formatDate('dd.mm.yy', date);
+							};
+							accrualsList.row.add([
+									date_str,
+									data.list_accruals[i]['type'],
+									data.list_accruals[i]['sum']
+							]).draw()
+						}
+						for (let i = 0; i < data.list_payments.length; i++) {
+							let date_payments = new Date(Date.parse(data.list_payments[i]['date']));
+							paymentsList.row.add([
+									$.datepicker.formatDate('dd.mm.yy', date_payments),
+									data.list_payments[i]['type'],
+									data.list_payments[i]['sum']
+							]).draw()
+						}
+						for (let i = 0; i < data.list_penalties.length; i++) {
+							penaltiesList.row.add([
+									data.list_penalties[i]['date'],
+									data.list_penalties[i]['sum_edit'],
+									data.list_penalties[i]['days'],
+									data.list_penalties[i]['rate'],
+									data.list_penalties[i]['sum']
+							]).draw()
+						}
+					},
+					complete: function(data) {
+							accrualsList.clear();
+							paymentsList.clear();
+              penaltiesList.clear();
+              summaryList.clear();
+					}
+				});
+			});
+			debit_list_table.on('click', 'tr #btn-description-debit-list', function (){
+				let id_debit = $(this).closest('tr').attr('id');
+				let row = $(this).closest('tr');
+				let member_id = debit_list_table.row(row).data().id;
+				$.ajax({
+					url: '/app/debit/' + member_id + '/list' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						let list = data.data
+						for(let i=0; i<list.length; i++) {
+							//	summaryList
+							let tableSummary = $('<table></table>').addClass('display').css('width', '100%').attr('id','debit-summary-list-' + i);
+							tableSummary.append('<thead><tr class="text-sm-left"><th class="w-75"></th><th></th></tr></thead>');
+							tableSummary.append('<tbody></tbody>');
+							tableSummary.append('<tfoot><tr><th style="text-align:right"></th><th id="summary-total"></th></tr></tfoot>');
+							$('#total-tab').append('<h6>'+list[i]['land_name']+'</h6>');
+							$('#total-tab').append(tableSummary);
+							let summaryList = $('#debit-summary-list-' + i).DataTable({
+								dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+											"<'row'<'col-sm-12'tr>>" +
+											"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+								ordering: false,
+								columnDefs: [{
+										targets: 1,
+										render: $.fn.dataTable.render.number(' ', '.', 2, ''),
+										className: 'text-right'
+									}
+								],
+								footerCallback: function(row, data, start, end, display) {
+									var api = this.api();
+									$(api.column(0).footer()).html('Итого: ');
+								},
+							 });
+							summaryList.row.add(['Сумма начислений: ', list[i]['total_accruals']]).draw();
+							summaryList.row.add(['Сумма платежей: ', list[i]['total_payments']]).draw();
+							summaryList.row.add(['Сумма начисленных пени: ', list[i]['total_penalties']]).draw();
+							let sum = 0;
+							summaryList.rows().every( function () {
+									let r = this.index();
+									let d = this.data();
+									if (r === 1) {
+										sum = sum - parseFloat(d[1])
+									} else {
+										sum = sum + parseFloat(d[1])
+									}
+							});
+							$('#summary-total').html($.fn.dataTable.render.number(' ', '.', 2, '').display(sum));
+							//	accrualsList
+							let tableAccruals = $('<table></table>').addClass('display').css('width', '100%').attr('id','debit-accruals-list-' + i);
+							tableAccruals.append('<thead><tr class="text-sm-left"><th class="w-50">Дата начисления</th> <th>Тип начислений</th>' +
+									'<th>Сумма</th></tr></thead>');
+							tableAccruals.append('<tbody></tbody>');
+							tableAccruals.append('<tfoot><tr><th style="text-align:right"></th><th></th><th></th></tr></tfoot>');
+							$('#accruals-tab').append('<h6>'+list[i]['land_name']+'</h6>');
+							$('#accruals-tab').append(tableAccruals);
+							let accrualsList = $('#debit-accruals-list-' + i).DataTable({
+								dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+											"<'row'<'col-sm-12'tr>>" +
+											"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+								ordering: false,
+								pageLength : 50,
+								language: {
+										emptyTable: "Нет начислений по данной задолженности"
+									},
+								columnDefs: [{
+										targets: 2,
+										render: $.fn.dataTable.render.number(' ', '.', 2, ''),
+										className: 'text-right'
+									}
+								],
+								footerCallback: function(row, data, start, end, display) {
+									let api = this.api();
+									// Очищаем от лишних символов значение и получаем число
+									let intVal = function (i) {
+										return typeof i === 'string' ?
+											1 * i.replace(/[\$,]/g, '') :
+											typeof i === 'number' ?
+													i : 0;
+									};
+									let pageTotal = api
+										.column( 2, { page: 'current'} )
+										.data()
+										.reduce( function (a, b) {
+												return intVal(a) + intVal(b);
+										 }, 0 );
+									$(api.column(1).footer()).html('Итого: ');
+									$(api.column(2).footer()).html($.fn.dataTable.render.number(' ', '.', 2, '').display(pageTotal));
+								},
+							 });
+							for (let j = 0; j < list[i]['list_accruals'].length; j++) {
+								let date = new Date(Date.parse(list[i]['list_accruals'][j]['date_start']));
+								let date_end = new Date(Date.parse(list[i]['list_accruals'][j]['date_finish']));
+								let date_str = ' - '
+								if (list[i]['list_accruals'][j]['type_num'] === '0') {
+										date_str = $.datepicker.formatDate('dd.mm.yy', date) + ' - ' + $.datepicker.formatDate('dd.mm.yy', date_end)
+							  } else {
+										date_str = $.datepicker.formatDate('dd.mm.yy', date)
+								}
+								accrualsList.row.add([date_str, list[i]['list_accruals'][j]['type'], list[i]['list_accruals'][j]['sum']]).draw()
+              }
+							//	paymentList
+							let tablePayments = $('<table></table>').addClass('display').css('width', '100%').attr('id','debit-payments-list-' + i);
+							tablePayments.append('<thead><tr class="text-sm-left"><th class="w-50">Дата платежа</th> <th>Тип платежа</th>' +
+									'<th>Сумма</th></tr></thead>');
+							tablePayments.append('<tbody></tbody>');
+							tablePayments.append('<tfoot><tr><th style="text-align:right"></th><th></th><th></th></tr></tfoot>');
+							$('#payments-tab').append('<h6>'+list[i]['land_name']+'</h6>');
+							$('#payments-tab').append(tablePayments);
+							let paymentsList = $('#debit-payments-list-' + i).DataTable({
+							dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+										"<'row'<'col-sm-12'tr>>" +
+										"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+							ordering: false,
+							pageLength : 50,
+							language: {
+									emptyTable: "Нет платежей по данной задолженности"
+								},
+							columnDefs: [{
+									targets: 2,
+									render: $.fn.dataTable.render.number(' ', '.', 2, ''),
+									className: 'text-right'
+								}
+							],
+							footerCallback: function(row, data, start, end, display) {
+								var api = this.api();
+								// Очищаем от лишних символов значение и получаем число
+								var intVal = function (i) {
+										return typeof i === 'string' ?
+												1 * i.replace(/[\$,]/g, '') :
+												typeof i === 'number' ?
+														i : 0;
+								};
+								var pageTotal = api
+										.column( 2, { page: 'current'} )
+										.data()
+										.reduce( function (a, b) {
+												return intVal(a) + intVal(b);
+										 }, 0 );
+								$(api.column(1).footer()).html('Итого: ');
+								$(api.column(2).footer()).html($.fn.dataTable.render.number(' ', '.', 2, '').display(pageTotal));
+							},
+						 });
+							for (let j = 0; j < list[i]['list_payments'].length; j++) {
+								let date = new Date(Date.parse(list[i]['list_payments'][j]['date']));
+								let date_str = $.datepicker.formatDate('dd.mm.yy', date)
+								paymentsList.row.add([date_str, list[i]['list_payments'][j]['type'], list[i]['list_payments'][j]['sum']]).draw()
+              }
+							//	penaltiesList
+							let tablePenalties = $('<table></table>').addClass('display').css('width', '100%').attr('id','debit-penalties-list-' + i);
+							tablePenalties.append('<thead><tr class="text-sm-left"><th class="w-50">Период начислений</th><th>Долг</th><th>Дней</th>' +
+									'<th>Ставка</th><th>Начислено</th></tr></thead>');
+							tablePenalties.append('<tbody></tbody>');
+							tablePenalties.append('<tfoot><tr><th></th><th></th><th colspan="2" style="text-align:right">' +
+									'</th><th></th></tr></tfoot>');
+							$('#penalties-tab').append('<h6>'+list[i]['land_name']+'</h6>');
+							$('#penalties-tab').append(tablePenalties);
+							let penaltiesList = $('#debit-penalties-list-' + i).DataTable({
+								dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+											"<'row'<'col-sm-12'tr>>" +
+											"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+								ordering: false,
+								pageLength : 50,
+								language: {
+										emptyTable: "Нет пени по данной задолженности."
+									},
+								columnDefs: [{
+										targets: [1,2,3,4],
+										className: 'text-right'
+									},
+									{
+										targets: 3,
+										render: $.fn.dataTable.render.number(' ', '.', 2, '')
+									},
+									{
+										targets: 4,
+										render: $.fn.dataTable.render.number(' ', '.', 2, '')
+									},
+								],
+								footerCallback: function(row, data, start, end, display) {
+									var api = this.api();
+									// Очищаем от лишних символов значение и получаем число
+									var intVal = function (i) {
+											return typeof i === 'string' ?
+													1 * i.replace(/[\$,]/g, '') :
+													typeof i === 'number' ?
+															i : 0;
+									};
+									var pageTotal = api
+											.column( 4, { page: 'current'} )
+											.data()
+											.reduce( function (a, b) {
+													return intVal(a) + intVal(b);
+											 }, 0 );
+									$(api.column(3).footer()).html('Итого: ');
+									$(api.column(4).footer()).html($.fn.dataTable.render.number(' ', '.', 2, '').display(pageTotal));
+								},
+							 });
+							for (let j = 0; j < list[i]['list_penalties'].length; j++) {
+								let dt = list[i]['list_penalties'][j]['date'];
+								penaltiesList.row.add([dt, list[i]['list_penalties'][j]['sum_edit'], list[i]['list_penalties'][j]['days'],
+																list[i]['list_penalties'][j]['rate'], list[i]['list_penalties'][j]['sum']]).draw()
+              }
+						}
+					},
+				 });
+			});
+
+			$('#modal-description-debit').on('hidden.bs.modal', function () {
+				window.location.href = '{% url 'app:debit_list' %}'
+			});
+			$('#debit-list').on('click', 'tr #btn-del-debit-group', function (){
+				let memberId = $(this).closest('tr').attr('id');
+				{#alert('Удаляем memberId - ' + memberId);#}
+				$('#modal-yes').on('click', function() {
+					$.get('/app/debitgroup/' + memberId + '/del', function(data){
+						window.location.href = '{% url 'app:debit_list' %}'
+					});
+				 });
+			});
+
+		 	$('#form-add-debit').submit(function(event) {
+				$.ajax({
+					type: $(this).attr('method'),
+					url: $(this).attr('action'),
+					data: $(this).serialize(),
+					success: function(data) {
+						console.log('Response - ' + data.data);
+						$('#form-add-debit').modal('hide');
+						window.location.href = '{% url 'app:debit_list' %}'
+					},
+					error: function(data){
+							console.log('Response error - ' + data.responseJSON.error);
+							console.log('Response data - ' + data.responseJSON.body);
+						$('#error-msg').html(data.responseJSON.error + '<br>Сравните данные с документом: ' + data.responseJSON.body)
+						$('#modal-alert').modal('show');
+					}
+				})
+				event.preventDefault();
+			});
+		});
+	</script>
+{% endblock %}

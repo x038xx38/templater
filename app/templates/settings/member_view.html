@@ -1,0 +1,88 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<div class="container">
+    <h3>Карточка члена товарищества</h3>
+    <div class="row">
+        <div class="m-auto col-md-8">
+            <dl class="row">
+                <dt class="col-sm-3">ФИО:</dt>
+                <dd class="col-sm-9">{{ member_detail.fio }}</dd>
+                <dt class="col-sm-3">Адрес:</dt>
+                <dd class="col-sm-9">{{ member_detail.address }}</dd>
+                <dt class="col-sm-3">Телефон:</dt>
+                <dd class="col-sm-9">{{ member_detail.phone }}</dd>
+                {% if member_detail.status == '1' %}
+                    <dt class="col-sm-3">Член товарищества:</dt>
+                    <dd class="col-sm-9">Да</dd>
+                {% else %}
+                    <dt class="col-sm-3">Член товарищества:</dt>
+                    <dd class="col-sm-9">Нет</dd>
+                {% endif %}
+            </dl>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'app:member_edit' id=member_detail.id %}">
+                <button class="btn btn-primary ml-3 pull-right" type="submit">Редактировать</button>
+            </a>
+        </div>
+    </div>
+    <hr/>
+
+    <h4>Участки</h4>
+    <table class="table table-hover table-sm text-muted table-bordered">
+        <thead>
+            <tr>
+                <th scope="col" style="border-bottom: 0px; text-align: center;">№</th>
+                <th scope="col" style="border-bottom: 0px;">Адрес участка</th>
+                <th scope="col" class="w-50" style="border-bottom: 0px;">Кадастровый номер</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in lands %}
+            <tr style='cursor: pointer;' onclick="document.location = '{% url 'app:land_edit' id=item.id %}';">
+                <td align="center">{{ item.number }}</td>
+                <td>{{ item.address }}</td>
+                <td>{{ item.kadastr_number }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" align="center">Нет ни одного участка</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'app:land_add' id=member_detail.id %}">
+        <button class="btn btn-primary pull-right" type="submit">Добавить</button>
+    </a>
+
+    <div style="height: 50px;"></div>
+
+    <h4>Задолженность</h4>
+
+    <table class="table table-hover table-sm text-muted table-bordered">
+      <thead>
+        <tr>
+          <th scope="col" style="border-bottom: 0px;">Начало задолженности</th>
+          <th scope="col" style="border-bottom: 0px;">Конец задолженности</th>
+          <th scope="col" class="w-50" style="border-bottom: 0px;">Сумма</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for item in credits %}
+        <tr style="cursor: pointer" onclick="document.location = '{% url 'app:credit_edit' id=item.id %}';">
+          <td>{{ item.date_start|date:"d.m.Y" }}</td>
+          <td>{{ item.date_finish|date:"d.m.Y" }}</td>
+          <td>{{ item.summa }}</td>
+        </tr>
+      {% empty %}
+          <tr><td colspan="3" align="center">Нет задолженности</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <a href="{% url 'app:credit_add' id=member_detail.id %}">
+    <button class="btn btn-primary mb-5 pull-right" type="submit">Добавить</button>
+    </a>
+
+</div>
+
+{% endblock %}

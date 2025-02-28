@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<center>
+   <h2>Ваш файл</h2>
+{#   <a href="{% url 'download_file' %}" download>Download PDF</a>#}
+    <a href="http://127.0.0.1:8000/media/output/{{ filename }}" download="http://127.0.0.1:8000/media/output/{{ filename }}">
+        Скачать файл
+    </a>
+</center>
+
+{% endblock %}

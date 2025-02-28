@@ -1,0 +1,26 @@
+{% load static %}
+{#{{ courts }}#}
+<h4>Шаг 4. Судебные участки</h4>
+<table id="result" class="table table-hover mt-3 table-sm text-muted table-bordered">
+	<thead>
+		<tr>
+			<th style="border-bottom: 0px;">Судебный участок</th>
+			<th style="border-bottom: 0px;">Адрес</th>
+			<th style="border-bottom: 0px;">Телефон</th>
+			<th style="border-bottom: 0px;"></th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for item in courts.court %}
+		<tr>
+			<td>{{ item.short_name }}</td>
+			<td>{{ item.address }}</td>
+			<td>{{ item.phones }}</td>
+			<td align="center">
+				<input type="radio" name="court_url" value="undefined" checked="">
+			</td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+<input type="hidden" name="process" value="{{ courts.court.0.process }}">

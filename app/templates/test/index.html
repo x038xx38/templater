@@ -1,0 +1,48 @@
+{% extends "base_generic.html" %}
+{% block styles %}
+    <link href="tail.select-bootstrap4.css" rel="stylesheet"/>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h3>{{ data }}</h3>
+        <a href="{%url 'app:summary'%}">СВОДКА</a>
+        <hr>
+        <br />
+
+        <div class="row">
+            <div class="col-md-6 text-right">
+                <select id="select1">
+                    <option selected="selected">test option _ 1</option>
+                    <option>test option _ 2</option>
+                    <option>test option _ 3</option>
+                    <option>test option _ 4</option>
+                    <option>test option _ 5</option>
+                </select>
+
+            </div>
+            <div class="col-md-6">
+                <select multiple id="select2">
+                    <option selected="selected">test multiple option _ 1</option>
+                    <option>test multiple option _ 2</option>
+                    <option>test multiple option _ 3</option>
+                    <option>test multiple option _ 4</option>
+                    <option>test multiple option _ 5</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="tail.select-full.min.js"></script>
+    <script>
+        tail.select('#select1', {
+
+        });
+        tail.select('#select2', {
+
+        });
+    </script>
+{% endblock %}

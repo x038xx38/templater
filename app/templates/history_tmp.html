@@ -1,0 +1,408 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block styles %}
+<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+<style>
+		/* Вопрос/ответ */
+		.faq {
+				background-color: #f2f2f2;
+				border-radius: 8px;
+				padding: 20px;
+				min-height: 40px;
+				position: relative;
+				overflow: hidden;
+				margin: 10px 0;
+				transition: 0.3s ease;
+		}
+		.faq ul {
+				padding: 20px;
+		}
+		.faq.active {
+				background-color: #fff;
+				box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.1);
+		}
+		.faq-title {
+				color: black;
+				font-weight: bold;
+		}
+		.faq-text {
+				display: none;
+				margin: 0;
+		}
+		.faq.active .faq-text{
+				display: block;
+		}
+		.faq-toggle {
+				background-color: transparent;
+				border: none;
+				color: #fff;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 16px;
+				padding: 0;
+				/*position: absolute;*/
+				/*top: 25px;*/
+				/*right: 20px;*/
+				/*height: 30px;*/
+				/*width: 30px;*/
+		}
+		.faq-toggle:focus {
+				outline: none;
+		}
+		.faq.active .faq-toggle {
+				/*background-color: #9FA4A8;*/
+		}
+		.faq-toggle .fa-times {
+				display: none;
+		}
+
+		.faq-toggle .fa-chevron-down {
+				color: #83888E;
+		}
+		.faq.active .faq-toggle .fa-chevron-down {
+				-moz-transform:rotate(180deg);
+				-webkit-transform:rotate(180deg);
+				transform: rotate(180deg);
+		}
+</style>
+{% endblock %}
+{% block content %}
+
+		<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>История создания документов</h3>
+
+		<div class="modal modal_outer first_modal fade" id="modal-desc-member" tabindex="-1" role="dialog"
+			 aria-labelledby="modal-desc-member" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title" id="title-fio">Фамилия Имя Отчество</h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						<div class="card-box">
+							<div class="card mb-4">
+								<div class="card-body">
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">ФИО: </div>
+										<div class="col-md-8" id="fio"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Статус: </div>
+										<div class="col-md-8" id="status"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Адрес регистрации: </div>
+										<div class="col-md-8" id="address"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Номер телефона: </div>
+										<div class="col-md-8" id="phone"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Электронная почта: </div>
+										<div class="col-md-8" id="email"></div>
+									</div>
+								</div>
+							</div>
+							<div id="accordion">
+
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+							<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+						<!--button type="button" class="btn btn-primary" name="btn-desc-member-edit" id="btn-desc-member-edit">
+							<i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button-->
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		{% for item in history %}
+			<div class="faq d-flex flex-row flex-fill flex-nowrap">
+				<div class="d-flex flex-column flex-fill">
+					<h5 class="faq-title text-uppercase">{{ item.member_id__second_name }} {{ item.member_id__first_name }} {{ item.member_id__third_name }}</h5>
+					<div class="faq-text">
+						{% for doc in item.file_template %}
+							{% if forloop.counter|divisibleby:2 %}
+								<div class="row no-gutters">
+									<div class="col-sm py-2">
+										<div class="card">
+											<div class="card-body">
+												<div class="float-right text-muted">{{ doc.date_template }}</div>
+												<h4 class="card-title">{{ doc.name_template }}</h4>
+													<p class="card-text">
+														<span><a href="{{ MEDIA_URL }}{{ doc.file_template }}" download>
+															<i class="far fa-file-word fa-lg"></i> <span style="">{{ doc.filename }}</span></a></span></p>
+											</div>
+										</div>
+									</div>
+									<div class="col-sm-1 text-center flex-column d-none d-sm-flex">
+										<div class="row h-50">
+											<div class="col border-right">&nbsp;</div>
+											<div class="col">&nbsp;</div>
+										</div>
+										<h5 class="m-2">
+											<span class="badge badge-pill bg-light border">&nbsp;</span>
+										</h5>
+										<div class="row h-50">
+											<div class="col {% if not forloop.last %} border-right {% endif %}">&nbsp;</div>
+											<div class="col">&nbsp;</div>
+										</div>
+									</div>
+									<div class="col-sm"> <!--spacer--> </div>
+								</div>
+							{% else %}
+								<div class="row no-gutters">
+									<div class="col-sm"> <!--spacer--> </div>
+									<!-- timeline item 1 center dot -->
+									<div class="col-sm-1 text-center flex-column d-none d-sm-flex">
+										<div class="row h-50">
+											<div class="col {% if not forloop.first %} border-right {% endif %}">&nbsp;</div>
+											<div class="col">&nbsp;</div>
+										</div>
+										<h5 class="m-2">
+											<span class="badge badge-pill bg-light border">&nbsp;</span>
+										</h5>
+										<div class="row h-50">
+											<div class="col {% if not forloop.last %} border-right {% endif %}">&nbsp;</div>
+											<div class="col">&nbsp;</div>
+										</div>
+									</div>
+									<!-- timeline item 1 event content -->
+									<div class="col-sm py-2">
+										<div class="card">
+											<div class="card-body">
+												<div class="float-right text-muted">{{ doc.date_template }}</div>
+												<h4 class="card-title">{{ doc.name_template }}</h4>
+												<p class="card-text">
+													<span><a href="{{ MEDIA_URL }}{{ doc.file_template }}" download>
+														<i class="far fa-file-word fa-lg"></i> <span style="">{{ doc.filename }}</span></a></span></p>
+											</div>
+										</div>
+									</div>
+								</div>
+							{% endif %}
+						{% endfor %}
+						<h4 class="mt-5 ml-3 card-title">Приложение к документам:</h4>
+						<ul class="list-group list-group-flush">
+							{% if ustav %}
+							<li class="list-group-item">
+								<span class="text-uppercase">Устав организации:&nbsp;&nbsp;</span>
+								<span><a href="{{ MEDIA_URL }}{{ ustav.path }}" target="_blank" download >
+															<i class="far fa-file-pdf fa-lg"></i> <span>{{ ustav.filename }}</span></a></span>
+							</li>
+							{% endif %}
+
+							{% if ogrn %}
+							<li class="list-group-item">
+								<span class="text-uppercase">Свидетельство ОГРН:&nbsp;&nbsp;</span>
+								<span><a href="{{ MEDIA_URL }}{{ ogrn.path }}" target="_blank" download>
+															<i class="far fa-file-pdf fa-lg"></i> <span>{{ ogrn.filename }}</span></a></span>
+							</li>
+							{% endif %}
+
+							{% if inn %}
+							<li class="list-group-item">
+								<span class="text-uppercase">Свидетельство ИНН:&nbsp;&nbsp;</span>
+								<span><a href="{{ MEDIA_URL }}{{ inn.path }}" target="_blank" download>
+															<i class="far fa-file-pdf fa-lg"></i> <span>{{ inn.filename }}</span></a></span>
+							</li>
+							{% endif %}
+
+							{% if yegryul %}
+							<li class="list-group-item">
+								<span class="text-uppercase">Выписка ЕГРЮЛ:&nbsp;&nbsp;</span>
+								<span><a href="{{ MEDIA_URL }}{{ yegryul.path }}" target="_blank" download >
+															<i class="far fa-file-pdf fa-lg"></i> <span>{{ yegryul.filename }}</span></a></span>
+							</li>
+							{% endif %}
+
+							{% if fee_doc %}
+							<li class="list-group-item">
+								<span class="text-uppercase">Членские взносы:&nbsp;&nbsp;</span>
+								{% for item in fee_doc %}
+								<span><a href="{{ MEDIA_URL }}{{ item.path }}" target="_blank" download>
+															<i class="far fa-file-pdf fa-lg"></i> <span>{{ item.filename }}</span></a>
+								{% if not forloop.last %}, {% endif %}
+								</span>
+								{% endfor %}
+							</li>
+							{% endif %}
+						</ul>
+					</div>
+				</div>
+				<a class="d-flex align-self-start faq-toggle ml-auto"><i class="fas fa-chevron-down"></i><i class="fas fa-times"></i></a>
+			</div>
+		{% empty %}
+			<div class="card mt-3">
+				<div class="card-body">
+					<p class="card-text text-center">Истории создания документов нет ... </p>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+	<script>
+		$(function () {
+			const toggles = document.querySelectorAll('.faq');
+			toggles.forEach(toggle => {
+				toggle.addEventListener('click', (event) => {
+					let title = toggle.getElementsByClassName('faq-title')[0].innerText;
+					if (toggle.classList.contains('active')) {
+						//alert(event.target.tagName);
+						if (event.target.tagName.toLowerCase() !== 'span') {
+							toggle.classList.remove('active');
+							toggle.getElementsByClassName('faq-title')[0].innerHTML = title;
+						}
+					} else {
+						toggle.classList.add('active');
+						toggle.getElementsByClassName('faq-title')[0].innerHTML = '<a href="#"><span id="btn-desc-member">'+title+'</span></a>'
+					}
+				});
+			});
+
+			$('.faq-title').on('click', 'a', function (e){
+				e.preventDefault();
+				//let id = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/member/19/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						$('#modal-desc-member').modal('show');
+						let fio = data.second_name + ' ' + data.first_name + ' ' + data.third_name
+						$('#title-fio').text(fio);
+						$('.card-body #fio').text(fio);
+						$('.card-body #status').text(data.status_value);
+						$('.card-body #address').text(data.address);
+						$('.card-body #phone').text(data.phone);
+						$('.card-body #email').text(data.email);
+
+						let list = JSON.parse(data.land_list);
+						let accord = '';
+						for(let i=0; i<list.length; i++) {
+							let html = `<div class="card mb-3">
+									<div class="card-header" id="heading_${list[i].pk}">
+										<h5 class="mb-0">
+											<button class="btn btn-link" data-toggle="collapse" data-target="#collapse_${list[i].pk}"
+															aria-expanded="true" aria-controls="collapseOne">
+												${list[i].fields.land_address}
+											</button>
+										</h5>
+									</div>
+									<div id="collapse_${list[i].pk}" class="collapse" aria-labelledby="heading_${list[i].pk}" data-parent="#accordion">
+										<div class="card-body">
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Номер участка: </div>
+												<div class="col-md-8" id="number">${list[i].fields.number}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Кадастровый номер: </div>
+												<div class="col-md-8" id="kadastr_number">${list[i].fields.kadastr_number}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Адрес участка: </div>
+												<div class="col-md-8" id="land_address">${list[i].fields.land_address}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Документы: </div>
+												<div class="col-md-8" id="attachment">${list[i].fields.attachment}</div>
+											</div>
+										</div>
+									</div>
+								</div>`;
+							accord = accord + html;
+							console.log(list[i].fields.kadastr_number)
+						}
+						$('#accordion').html(accord);
+
+						let ownership = JSON.parse(data.ownership);
+            for(let i=0; i<ownership.length; i++){
+                let row =`		<hr />
+																							<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">В собственности: </div>
+												<div class="col-md-8" id="hold">с ${ownership[i].fields.start_hold} по ${ownership[i].fields.end_hold}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Документы: </div>
+												<div class="col-md-8" id="attachment">${ownership[i].fields.attachment}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Комментарий: </div>
+												<div class="col-md-8" id="comment">${ownership[i].fields.comment}</div>
+											</div>`;
+                let set = `#collapse_${ownership[i].fields.land} .card-body`
+								{#alert(set)#}
+								$(set).append(row);
+						}
+						return edit_data=data;
+					},
+				});
+			});
+			$('#btn-desc-member-edit').on('click', function (){
+				$('#modal-desc-member').modal('hide');
+        $('#modal-add-member .modal-title').text('Редактирование');
+
+				$('#modal-add-member input[name="first_name"]').val(edit_data.first_name);
+				$('#modal-add-member input[name="second_name"]').val(edit_data.second_name);
+				$('#modal-add-member input[name="third_name"]').val(edit_data.third_name);
+				//$("select[name=foo] option[value=bar]).attr('selected','selected');
+				$('#modal-add-member select[name="status"]').val(edit_data.status).change();
+				$('#modal-add-member input[name="address"]').val(edit_data.address);
+				$('#modal-add-member input[name="series_number_doc"]').val(edit_data.series_number_doc);
+				$('#modal-add-member input[name="division_code"]').val(edit_data.division_code);
+
+				if (edit_data.date_of_issue !== null){
+					let dateOfIssue = new Date(Date.parse(edit_data.date_of_issue));
+					$('#modal-add-member input[name="date_of_issue"]').val($.datepicker.formatDate('dd.mm.yy', dateOfIssue));
+				} else {
+					$('#modal-add-member input[name="date_of_issue"]').val('');
+				}
+
+				$('#modal-add-member textarea[name="issued"]').val(edit_data.issued);
+
+				if (edit_data.date_of_birth !== null){
+					let dateOfBirth = new Date(Date.parse(edit_data.date_of_birth));
+					$('#modal-add-member input[name="date_of_birth"]').val($.datepicker.formatDate('dd.mm.yy', dateOfBirth));
+				} else {
+					$('#modal-add-member input[name="date_of_birth"]').val('');
+				}
+
+				$('#modal-add-member input[name="place_of_birth"]').val(edit_data.place_of_birth);
+
+				$('#modal-add-member input[name="phone"]').val(edit_data.phone);
+				$('#modal-add-member input[name="email"]').val(edit_data.email);
+				$('<input>').attr({
+						type: 'hidden',
+						id: 'id_member',
+						name: 'id_member',
+						value: edit_data.id
+				}).appendTo('#form-add-member');
+
+				let list = JSON.parse(edit_data.land_list);
+				let row = '';
+				for(let i=0; i<list.length; i++) {
+						let html = `<tr><td hidden>${list[i].pk}</td>
+									<td>${list[i].fields.kadastr_number}</td><td>${list[i].fields.land_address}</td><td class="text-right">
+									<a href="#"><span id="trash" title="Открепить участок" data-toggle="tooltip">
+									<i class="far fa-trash-alt"></i></span></a></td></tr>`
+						row = row + html;
+				}
+				$('#add-member-land-list > tbody').html(row)
+		 		$('#modal-add-member').modal('show');
+			});
+			//$('[data-toggle="tooltip"]').tooltip();
+		});
+	</script>
+{% endblock %}

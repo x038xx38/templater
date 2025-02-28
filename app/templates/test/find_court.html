@@ -1,0 +1,45 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <div class="container p-5">
+        <h3>Определяем судебный участок (по г. Москва)</h3>
+        <form method="post">
+            {% csrf_token %}
+             <div class="row form-group mt-4">
+                <div class="col">
+                    <div id="div_id_bik" class="form-group">
+                        <label for="id_bik" class=" requiredField">Адрес<span class="asteriskField">*</span> </label>
+                        <div class="">
+                            <input type="text" name="bik"
+                                              class="textinput textInput form-control" required="" id="id_bik">
+                            <small id="hint_id_bik" class="form-text text-muted">г. Москва, ул. Седова, 13</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <div class="">
+                            <input type="submit" name="find_court" value="Найти"
+                                   class="btn btn-primary btn-primary" style="margin-top:36px"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    {% if courts %}
+        {% for item in courts%}
+        <p>{{ item.full_name }}</p>
+        <p>{{ item.short_name }}</p>
+        <p>{{ item.address }}</p>
+        <p>{{ item.phones }}</p>
+        <p>{{ item.judge_fio }}</p>
+        <p>{{ item.dinner_time }}</p>
+        <p>{{ item.email }}</p>
+        {% endfor %}
+    {% endif %}
+
+
+    </div>
+
+{% endblock %}

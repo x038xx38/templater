@@ -1,0 +1,181 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block styles %}
+	{# это стиль содержит данные для мультиформы	#}
+	<link rel="stylesheet" href="{% static 'app/multi-form/css/multi-style.css' %}">
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+
+{% block content %}
+	<div class="modal fade" id="msg-info" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header border-bottom-0">
+						<h5 class="modal-title"></h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body text-center mt-4 mb-4">
+						<h5></h5>
+					</div>
+					<div class="modal-footer border-top-0">
+						<button type="button" class="btn btn-primary m-auto" style="width: 120px;" data-dismiss="modal">ОK</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>{{ header }}</h3>
+		<table id="debtors-list" class="table table-sm text-muted table-bordered">
+		<thead>
+			<tr class="text-uppercase text-sm-center">
+				<th style="text-align: center"></th>
+				<th>ФИО Должника</th>
+				<th>Участок должника</th>
+				<th>Задолженность</th>
+				<th hidden></th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for data in dataset %}
+			{% if data.summa > 0 %}
+				<tr id="{{ data.id }}">
+					<td>
+						{% if forloop.first %}
+								<div align="center">
+										<input name="member_id" value="{{ data.id }}" type="radio" id="radio" checked>
+								</div>
+						{% else %}
+								<div align="center">
+										<input name="member_id" value="{{ data.id }}" type="radio" id="radio">
+								</div>
+						{% endif %}
+					</td>
+					<td>{{ data.members }}</td>
+					<td>
+						{% for item in data.lands %}
+							{{ item }}<br>
+						{% endfor  %}
+					</td>
+					<td>{{ data.summa|floatformat:2 }}</td>
+					<td hidden>{{ data.penalties }}</td>
+				</tr>
+			{% endif %}
+		{%  endfor %}
+		</tbody>
+		</table>
+	</div>
+{% endblock %}
+
+{% block scripts %}
+	<script src="{% static 'app/multi-form/js/jquery.steps.js' %}"></script>
+	<script src="{% static 'app/multi-form/js/pretrial_form.js' %}"></script>
+
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+
+	<script>
+		$(document).ready(function () {
+			let debtors_list = $('#debtors-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-3'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 mt-3'p>>",
+				language: {
+						paginate: {
+							first: "Первая",
+							previous: '<i class="fas fa-angle-double-left"></i>',
+							next: '<i class="fas fa-angle-double-right"></i>',
+							last: "Последняя"
+						},
+						info: "Записи с _START_ до _END_ из _TOTAL_ записей",
+						infoFiltered: "(отфильтровано из _MAX_ записей)",
+						loadingRecords: "Загрузка записей...",
+						zeroRecords: "Записи отсутствуют.",
+						infoEmpty: "",
+						processing: "Подождите...",
+						search: '',
+						lengthMenu: "Показать _MENU_ записей",
+						emptyTable: "Нет записей в справочнике"
+					},
+				buttons: [
+					{
+						text: '<span title=\'Создать шаблон\' data-toggle=\'tooltip\'>' +
+								'<i class="far fa-credit-card"></i></i>&nbsp;&nbsp;Создать шаблон</span>',
+						className: 'btn btn-primary btn-sm float-right ml-2',
+						attr: {
+								'id': 'create-tmp'
+							}
+					},
+				],
+				ordering: true,
+			});
+
+			let test = '<div class="input-group">' +
+					'<input class="form-control form-control-sm" id="search-member-list" type="search" placeholder="Поиск" aria-controls="member-list">' +
+					'<span class="input-group-append">' +
+					'<button class="btn btn-sm btn-outline border-left-0 border" type="button"><span class="text-secondary"><i class="fas fa-search"></i></span></button></span></div>'
+			let test2 = '<button type="submit"><i class="fa fa-search"></i></button>'
+			$('.dataTables_filter').html(test)
+			// #myInput is a <input type="text"> element
+			$('#search-member-list').on( 'keyup', function () {
+				debtors_list.search( this.value ).draw();
+			});
+
+
+			$('#create-tmp').on('click', function() {
+				let ownership;
+				let total;
+				$('#debtors-list tbody tr').each(function(){
+					if($(this).find('#radio').is(':checked')){
+						ownership = $(this).find('td:eq(0)').find('#radio').val()
+						total = $(this).find('td:eq(3)').text()
+					}
+				});
+
+				if ((ownership === undefined) && (total === undefined)) {
+					$('#msg-info .modal-body').html('<h5>Необходимо выбрать должника, для формирования шаблона!</h5>');
+					$('#msg-info').modal('show');
+					return false;
+				}
+
+				let formData = {
+					'ownership': ownership,
+					'total': total,
+				};
+
+				$.ajax({
+					type: 'POST',
+					beforeSend: function (xhr) {
+							xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+							xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+					},
+					url: '/app/preisk_tmp',
+					data: formData,
+					success: function(data) {
+						//console.log(data.data);
+						$('#msg-info .modal-body').html('<h5>Шаблон успешно сформирован!</h5>');
+						$('#msg-info').modal('show');
+						$("#msg-info").on('hidden.bs.modal', function (e) {
+            	window.location.href = '/app/history_tmp';
+        		});
+					},
+					complete: function () {
+						//let ownership;
+						//$('#debtors-list tbody tr').each(function(){
+						//	if($(this).find('#radio').is(':checked')){
+						//		ownership = $(this).find('td:eq(0)').find('#radio').val()
+						//	}
+						//});
+						//window.location.href = '/app/history_tmp'
+					}
+				});
+			 });
+    });
+	</script>
+{% endblock %}

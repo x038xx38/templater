@@ -1,0 +1,24 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container">
+    <h3>Добавить в товарищество</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="col p-3">
+                {{ form.first_n|as_crispy_field }}
+                {{ form.second_n|as_crispy_field }}
+                {{ form.third_n|as_crispy_field }}
+            </div>
+            <div class="col p-3">
+                {{ form.address|as_crispy_field }}
+                {{ form.phone|as_crispy_field }}
+            </div>
+        </div>
+        <button class="btn btn-primary pull-right" type="submit">Добавить</button>
+    </form>
+</div>
+
+{% endblock %}

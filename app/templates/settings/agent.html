@@ -1,0 +1,53 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+    <div class="container">
+        <h3>Организация</h3>
+        <ul class="nav nav-tabs pt-3">
+          <li class="nav-item">
+            <a class="nav-link" href="{%url 'app:company_detail'%}">Основные</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{%url 'app:bank_detail'%}">Банковские реквизиты</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'app:agent_list' %}">Представители</a>
+          </li>
+        </ul>
+
+    {% if err_msg %}
+        <p align="center">{{ err_msg }}</p>
+    {% elif form_agent %}
+        <div style="height: 20px;"></div>
+        <h5>Добавить представителя компании</h5>
+        {% crispy form_agent %}
+    {% else %}
+        <div style="height: 20px;"></div>
+        <h5>Представители компании</h5>
+        <table class="table table-hover mt-3 table-sm text-muted table-bordered">
+          <thead>
+            <tr>
+              <th scope="col" style="border-bottom: 0px;">ФИО</th>
+              <th scope="col" style="border-bottom: 0px;">Адрес</th>
+              <th scope="col" style="border-bottom: 0px;">Телефон</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in dataset %}
+            <tr style="cursor: pointer" onclick="document.location = '{% url 'app:agent_edit' id=data.id %}';">
+                <td>{{ data.fio }}</td>
+                <td>{{ data.address }}</td>
+                <td>{{ data.phone }}</td>
+            </tr>
+            {% empty %}
+                <tr><td colspan="3" align="center">В базе данных нет информации о Представителях компании</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <a href="{% url 'app:agent_add' %}">
+            <button class="btn btn-primary mb-5 pull-right mt-3" type="submit">Добавить</button>
+        </a>
+    {% endif %}
+    </div>
+{% endblock %}

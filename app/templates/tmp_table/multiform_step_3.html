@@ -1,0 +1,24 @@
+{% load static %}
+<h4>Шаг 3. Земельные участки</h4>
+<table id="result" class="table table-hover mt-3 table-sm text-muted table-bordered">
+	<thead>
+		<tr>
+			<th style="border-bottom: 0px;"></th>
+			<th style="border-bottom: 0px;">Адрес участка</th>
+			<th style="border-bottom: 0px;">Сумма задолженности</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for item in lands %}
+		<tr>
+			<td>{{ item.land_id }}</td>
+			<td>{{ item.land__land_address }}</td>
+			<td>{{ item.sum }}</td>
+{#			<td align="center">#}
+{#				<input type="radio" name="court_url" value="undefined" checked="">#}
+{#			</td>#}
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+<input type="hidden" name="process" value="{{ courts.court.0.process }}">

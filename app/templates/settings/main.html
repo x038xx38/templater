@@ -1,0 +1,1067 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+
+{% block content %}
+{% url 'app:company_detail' as tab_1 %}
+{% url 'app:company_bank' as tab_2 %}
+{% url 'app:company_agent' as tab_3 %}
+{% url 'app:company_scan' as tab_4 %}
+<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+    <h3>Организация</h3>
+    <div class="mb-3">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item text-uppercase">
+                <a class="nav-link {% if request.path == tab_1 %} active {% endif %}" id="company-tab" data-toggle="tab"
+                   href="#company" role="tab" aria-controls="company" aria-selected="false">Основные</a>
+            </li>
+            <li class="nav-item text-uppercase">
+                <a class="nav-link {% if request.path == tab_2 %} active {% endif %}" id="bank-tab" data-toggle="tab"
+                   href="#bank" role="tab" aria-controls="bank" aria-selected="false">Банковские реквизиты</a>
+            </li>
+            <li class="nav-item text-uppercase">
+                <a class="nav-link {% if request.path == tab_3 %} active {% endif %}" id="agent-tab" data-toggle="tab"
+                   href="#agent" role="tab" aria-controls="agent" aria-selected="false">Представители</a>
+            </li>
+            <li class="nav-item text-uppercase">
+                <a class="nav-link {% if request.path == tab_4 %} active {% endif %}" id="scan-tab" data-toggle="tab"
+                   href="#scan" role="tab" aria-controls="scan" aria-selected="false">Документы</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content p-4">
+        <!-- company data // -->
+        <div class="tab-pane fade {% if request.path == tab_1 %} show active {% endif %}" id="company" role="tabpanel" aria-labelledby="company-tab">
+            {% if company %}
+            <div class="form-group">
+                <label for="id_company_name_result">Наименование организации:</label>
+                <input type="text" class="textInput form-control bg-light" disabled name="company_name_result"
+                       id="id_company_name_result" value="{{ company.company_name }}">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_company_inn_result">ИНН:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="company_inn_result"
+                               id="id_company_inn_result" value="{{ company.company_inn }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_company_ogrn_result">ОГРН:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="company_ogrn_result"
+                               id="id_company_ogrn_result" value="{{ company.company_ogrn }}">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_full_company_name_result">Наименование организации (полное):</label>
+                <input type="text" class="textInput form-control bg-light" disabled name="full_company_name_result"
+                       id="id_full_company_name_result" value="{{ company.full_company_name }}">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_fio_manager_result">Руководитель организации:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="fio_manager_result"
+                               id="id_fio_manager_result" value="{{ company.fio_manager }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_position_manager_result">Должность:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="fio_position_manager_result"
+                               id="id_position_manager_result" value="{{ company.position_manager }}">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_full_address_result">Юридический адрес:</label>
+                <input type="text" class="textInput form-control bg-light" disabled name="full_address_result"
+                       id="id_full_address_result" value="{{ company.full_address }}">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_rate_result">Пени:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="rate_result"
+                               id="id_rate_result" value="{{ rate }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_phone_result">Телефон:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="phone_result"
+                               id="id_phone_result" value="{{ company.phone }}" data-mask="+7 (000) 000-00-00">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_email_result">Электронная почта:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="email_result"
+                               id="id_email_result" value="{{ company.email }}">
+                    </div>
+                </div>
+            </div>
+            <div class="float-right mt-4 mb-5">
+                <button type="button" name="company-edit" id="button-id-company-edit"
+                        class="btn btn-primary" data-toggle="modal" data-target="#modal-company">
+                    <i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button></div>
+            {% else %}
+            <div class="mt-4 mb-5" style="text-align: center;">
+                <button type="button" name="company-edit" id="button-id-company-edit"
+                        class="btn btn-primary" data-toggle="modal" data-target="#modal-company">
+                    <i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Заполнить реквизиты компании</button></div>
+            {% endif %}
+
+        </div>
+        <!-- // company data -->
+
+        <!-- bank data // -->
+        <div class="tab-pane fade {% if request.path == tab_2 %} show active {% endif %}" id="bank" role="tabpanel" aria-labelledby="bank-tab">
+        {% if bank %}
+            <div class="form-group">
+                <label for="id_bank_name_result">Наименование банка:</label>
+                <input type="text" class="textInput form-control bg-light" disabled name="bank_name_result"
+                       id="id_bank_name_result" value="{{ bank.bank_name }}">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_bik_result">БИК:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="bik_result"
+                               id="id_bik_result" value="{{ bank.bik_bank }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_inn_result">ИНН:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="inn_result"
+                               id="id_inn_result" value="{{ bank.inn_bank }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_kpp_result">КПП:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="kpp_result"
+                               id="id_kpp_result" value="{{ bank.kpp }}">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_correspondent_acc_result">Корреспондентский счет:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="correspondent_acc_result"
+                               id="id_correspondent_acc_result" value="{{ bank.correspondent_acc }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="id_checking_acc_result">Расчетный счет:</label>
+                        <input type="text" class="textInput form-control bg-light" disabled name="checking_acc_result"
+                               id="id_checking_acc_result" value="{{ bank.checking_acc }}">
+                    </div>
+                </div>
+            </div>
+            <div class="float-right mt-4">
+                <button type="button" name="bank-edit" id="button-id-bank-edit"
+                        class="btn btn-primary" data-toggle="modal" data-target="#modal-bank">
+                    <i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button></div>
+            {% else %}
+            <div class="mt-4" style="text-align: center;">
+                <button type="button" name="bank-edit" id="button-id-bank-edit"
+                        class="btn btn-primary" data-toggle="modal" data-target="#modal-bank">
+                    <i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Заполнить банковские реквизиты</button></div>
+            {% endif %}
+        </div>
+        <!-- // bank data -->
+
+        <!-- agent data // -->
+        <div class="tab-pane fade {% if request.path == tab_3 %} show active {% endif %}" id="agent" role="tabpanel" aria-labelledby="agent-tab">
+        {% if agent %}
+            <table id="agent_list" class="table table-hover mt-4 table-sm text-muted table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" style="border-bottom: 0px; text-align: center"></th>
+                    <th scope="col" style="border-bottom: 0px; text-align: center">Фио</th>
+                    <th scope="col" style="border-bottom: 0px; text-align: center">Должность</th>
+                    <th scope="col" style="border-bottom: 0px; text-align: center">Документ</th>
+                    <th scope="col" style="border-bottom: 0px; text-align: center">№ документа</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+                <tbody>
+                    {% for data in agent %}
+                    <tr id="{{ data.id }}">
+                        <td style="text-align: center;" data-toggle="modal" data-target="#messageInfo">
+                            <input type="radio" name="id_agent" value="{{ data.id }}"
+                            {% if data.active %} checked {% endif %}></td>
+                        <td>{{ data.first_name }} {{ data.second_name }} {{ data.third_name }}</td>
+                        <td>{{ data.position }}</td>
+                        <td>{{ data.get_doc_display}}</td>
+                        <td>{{ data.num_doc }}</td>
+                        <td style="text-align: center"><a href="#" data-toggle="modal" data-target="#modal-agent">
+                            <span id="button-id-agent-description"><i class="far fa-edit"></i></span></a></td>
+                        <td style="text-align: center"><a href="#" data-toggle="modal" data-target="#msg-delete">
+                            <span id="button-id-agent-delete"><i class="far fa-trash-alt"></i></span></a></td>
+                    </tr>
+                    {%  endfor %}
+                </tbody>
+            </table>
+            <div class="float-right mt-4">
+                <button type="button" name="agent-add" id="button-id-agent-add"
+                        class="btn btn-primary" data-toggle="modal" data-target="#modal-agent-add">
+                    <i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Добавить представителя</button></div>
+        {% endif %}
+        </div>
+        <!-- // agent data -->
+
+        <!-- scan data // -->
+        <div class="tab-pane fade {% if request.path == tab_4 %} show active {% endif %}" id="scan" role="tabpanel" aria-labelledby="scan-tab">
+            {% if scan %}
+            <table class="table table-borderless" name="scan">
+                <tbody>
+                {% for item in scan %}
+                    {% if item.filename %}
+                    <tr class="border-bottom">
+                        <td class="pt-3" style="height: 70px;">
+													<a href="#" data-toggle="modal" data-target="#modal-file"><span id="button-id-scan-file">
+                            <i class="far fa-file-pdf fa-2x"></i></span></a>
+												</td>
+                        <td data="{{ item.key }}" class="pl-4 pt-3 w-75">{{ item.filename }}</td>
+                        <td class="pr-5 pt-3">{{ item.size }}</td>
+                        <td class="pt-3">
+													<span><a href="{{ MEDIA_URL }}{{ item.filename }}" download>
+                            <i class="far fa-arrow-alt-circle-down fa-lg"></i></a></span>
+												</td>
+                        <td class="pt-3">
+													<a href="#" data-toggle="modal" data-target="#msg-delete">
+                            <span id="button-id-scan-delete"><i class="far fa-trash-alt fa-lg"></i></span></a>
+												</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <button type="button" name="scan-edit" id="button-id-scan-edit"
+                        class="btn btn-primary float-right mt-4" data-toggle="modal" data-target="#modal-scan">
+                    <i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button></div>
+            {% else %}
+            <div class="float-right mt-4">
+                <button type="button" name="scan-add" id="button-id-scan"
+                        class="btn btn-primary" data-toggle="modal" data-target="#modal-scan">
+                    <i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Добавить сканы</button></div>
+            {% endif %}
+        </div>
+        <!-- // scan data -->
+    </div>
+
+    <!-- modal company add/edit data -->
+    <div class="modal modal_outer first_modal fade" id="modal-company" tabindex="-1" role="dialog"
+         aria-labelledby="modal-company" aria-hidden="true" >
+        <div class="modal-dialog">
+            <form method="post" action="/app/company" id="form-company-edit">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Реквизиты компании</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                         {% crispy form_company %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                          <i class="fas fa-window-close"></i>&nbsp;&nbsp;Отменить</button>
+                        <button type="submit" class="btn btn-primary" name="save_company" id="button-id-company-save">
+                          <i class="fas fa-save"></i>&nbsp;&nbsp;Сохранить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal company -->
+
+    <!-- modal inn fill data -->
+    <div class="modal modal_outer second_modal fade" id="modal-inn" tabindex="-1" role="dialog"
+         aria-labelledby="modal-inn" aria-hidden="true">
+        <div class="modal-dialog">
+{#            <form method="post" action="" id="">#}
+{#                {% csrf_token %}#}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Заполнить по ИНН</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        {% crispy form_inn %}
+                        <div class="d-flex justify-content-center"><div class="spinner-border"></div></div>
+                        <div class="error-message"></div>
+                        <div class="result-find">
+                            <h5>Результаты поиска:</h5>
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col-md-3 text-muted">Наименование:</div>
+                                        <div class="col-md-9" id="result-company-name"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-3 text-muted">ИНН:</div>
+                                        <div class="col-md-9" id="result-company-inn"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-3 text-muted">ОГРН:</div>
+                                        <div class="col-md-9" id="result-company-ogrn"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-3 text-muted">Адрес:</div>
+                                        <div class="col-md-9" id="result-full-address"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-3 text-muted">ФИО:</div>
+                                        <div class="col-md-9" id="result-fio-manager"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                            <i class="fas fa-window-close"></i>&nbsp;&nbsp;Отменить</button>
+                        <button type="button" class="btn btn-primary" id="button-id-fill-inn" name="fill-inn">
+                            <i class="fas fa-file-alt"></i>&nbsp;&nbsp;Заполнить</button>
+                    </div>
+                </div>
+{#            </form>#}
+        </div>
+    </div>
+    <!-- modal inn -->
+
+    <!-- modal bank add/edit data -->
+    <div class="modal modal_outer first_modal fade" id="modal-bank" tabindex="-1" role="dialog"
+         aria-labelledby="modal-bank" aria-hidden="true" >
+        <div class="modal-dialog">
+            <form method="post" action="/app/bank" id="form-bank-edit">
+{#                {% csrf_token %}#}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Банковские реквизиты</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                        <i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                     {% crispy form_bank %}
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                      <i class="fas fa-window-close"></i>&nbsp;&nbsp;Отменить</button>
+                    <button type="submit" class="btn btn-primary" name="save_bank" id="button_id_bank_save">
+                      <i class="fas fa-save"></i>&nbsp;&nbsp;Сохранить</button>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal bank -->
+
+    <!-- modal bik fill data -->
+    <div class="modal modal_outer second_modal fade" id="modal-bik" tabindex="-1" role="dialog"
+         aria-labelledby="modal-bik" aria-hidden="true" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Заполнить по БИК</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                        <i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    {% crispy form_bik %}
+                    <div class="d-flex justify-content-center"><div class="spinner-border"></div></div>
+                    <div class="error-message"></div>
+                    <div class="result-find">
+                        <h5>Результаты поиска:</h5>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-md-3 text-muted">Наименование:</div>
+                                    <div class="col-md-9" id="result-bank-name"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-3 text-muted">ИНН:</div>
+                                    <div class="col-md-9" id="result-bank-inn"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-3 text-muted">КПП:</div>
+                                    <div class="col-md-9" id="result-bank-kpp"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-3 text-muted">БИК:</div>
+                                    <div class="col-md-9" id="result-bank-bik"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-3 text-muted">Корр. счет:</div>
+                                    <div class="col-md-9" id="result-correspondent-acc"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                      <i class="fas fa-window-close"></i>&nbsp;&nbsp;Отменить</button>
+                  <button type="button" class="btn btn-primary" id="button-id-fill-bik" name="fill-bik">
+                      <i class="fas fa-file-alt"></i>&nbsp;&nbsp;Заполнить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal bik -->
+
+    <!-- modal edit info message -->
+    <div class="modal fade" id="msg-edit" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body text-center">
+                    <h5>Данные формы были изменены.<br />Сохранить изменения?</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary mr-auto" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary float-right" id="edit-save">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal edit info message -->
+
+    <!-- modal delete info message -->
+    <div class="modal fade" id="msg-delete" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body text-center">
+                    <h5>Вы действительно хотите удалить запись?</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+                    <button type="button" class="btn btn-primary float-right" style="width: 120px;" id="modal-yes">Да</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal delete info message -->
+
+    <!-- modal info message -->
+    <div class="modal fade" id="msg-info" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body text-center">
+                    <h5>Представитель - <span id="fio_info"></span><br />
+                        Будет использоваться в шаблонах документов.</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary my-auto" style="width: 120px;" id="modal-ok" data-dismiss="modal">Ок</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal info message -->
+
+    <!-- modal agent edit data -->
+    <div class="modal modal_outer first_modal fade" id="modal-agent" tabindex="-1" role="dialog"
+         aria-labelledby="modal-agent" aria-hidden="true" >
+        <div class="modal-dialog">
+            <form method="post" action="/app/agent" enctype="multipart/form-data" id="form-agent">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Данные преставителя</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        {% crispy form_agent %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                          <i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+                        <button type="button" class="btn btn-primary" id="button-id-agent-edit"
+                                data-toggle="modal" data-target="#modal-agent-add">
+                          <i class="fas fa-save"></i>&nbsp;&nbsp;Редактировать</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal agent -->
+
+    <!-- modal agent add data -->
+    <div class="modal modal_outer second_modal fade" id="modal-agent-add" tabindex="-1" role="dialog"
+         aria-labelledby="modal-agent-add" aria-hidden="true" >
+        <div class="modal-dialog">
+            <form method="post" action="/app/agent" enctype="multipart/form-data" id="form-agent-edit">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Данные преставителя</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        {% crispy form_agent %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                          <i class="fas fa-window-close"></i>&nbsp;&nbsp;Отменить</button>
+                        <button type="submit" class="btn btn-primary" name="save_agent" id="button-id-agent-save">
+                          <i class="fas fa-save"></i>&nbsp;&nbsp;Сохранить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal agent -->
+
+    <!-- modal scan add data -->
+    <div class="modal modal_outer first_modal fade" id="modal-scan" tabindex="-1" role="dialog"
+         aria-labelledby="modal-scan" aria-hidden="true" >
+        <div class="modal-dialog">
+            <form method="post" action="/app/scan" enctype="multipart/form-data" id="form-scan">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Приложения документов</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_edit" id="id_edit" />
+                        {% crispy form_scan %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+                          <i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+                        <button type="submit" class="btn btn-primary" id="button-id-scan-save" name="save_scan">
+                            <i class="fas fa-arrow-circle-up"></i>&nbsp;&nbsp;Загрузить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal scan -->
+
+    <!-- modal scan file view -->
+    <div class="modal fade bd-example-modal-xl" id="modal-file" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body text-center">
+                    <embed src="" width="1100px" height="650px" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary my-auto" style="width: 120px;" id="modal-ok" data-dismiss="modal">Ок</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal scan file view -->
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'app/multi-form/js/ahunter_suggest.js' %}"></script>
+{#        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>  с ним ошибка !!! #}
+    <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+    <script>
+
+    /* Локализация datepicker */
+    $.datepicker.regional['ru'] = {
+        closeText: 'Закрыть',
+        prevText: 'Предыдущий',
+        nextText: 'Следующий',
+        currentText: 'Сегодня',
+        monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+        dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+        dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+        dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+        weekHeader: 'Не',
+        dateFormat: 'dd.mm.yy',
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: ''
+     };
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+
+    $(document).ready(function () {
+        /* Очистка форм поиска по ИНН и БИК */
+        $('#modal-inn, #modal-bik').on('show.bs.modal', function(){
+            $('.error-message').html('');
+            $('.spinner-border').hide();
+            $('.result-find').hide();
+            $('#button-id-fill-inn').hide();
+            $('#button-id-fill-bik').hide();
+            $('#modal-inn input[name="inn"]').val('');
+            $('#modal-bik input[name="bik"]').val('');
+         });
+
+        /* Форма редактирования реквизитов Компании */
+        let saveCompanyForm = '';
+        $('#button-id-company-edit').on('click', function() {
+            let dataToSend = {
+                company_inn: '{{ company.company_inn }}',
+                company_ogrn: '{{ company.company_ogrn }}',
+                company_name: '{{ company.company_name }}',
+                full_company_name: '{{ company.full_company_name }}',
+                fio_manager: '{{ company.fio_manager }}',
+                position_manager: '{{ company.position_manager }}',
+                full_address: '{{ company.full_address }}',
+                phone: '{{ company.phone }}',
+                email: '{{ company.email }}',
+                action: 'company_edit',
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/company',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {
+
+								},
+                success: function(data) {
+                    $('#modal-company input[name="company_name"]').val(data.company_name);
+                    $('#modal-company input[name="company_inn"]').val(data.company_inn);
+                    $('#modal-company input[name="company_ogrn"]').val(data.company_ogrn);
+                    $('#modal-company input[name="fio_manager"]').val(data.fio_manager);
+                    $('#modal-company input[name="position_manager"]').val(data.position_manager);
+                    $('#modal-company input[name="full_address"]').val(data.full_address);
+                    $('#modal-company input[name="phone"]').val(data.phone);
+                    $('#modal-company input[name="email"]').val(data.email);
+                    $('#modal-company input[name="full_company_name"]').val(data.full_company_name);
+                },
+                error: function(data){},
+                complete: function() {
+                    let fio_manager = $('#modal-company input[name="fio_manager"]').val();
+                    let position_manager = $('#modal-company input[name="position_manager"]').val();
+                    let rate = $('#modal-company input[name="rate"]').val();
+                    if ((fio_manager != '') || (position_manager != '') || (rate != '')) {
+                        $('#modal-company input[name="fio_manager"]').attr('disabled', true);
+                        $('#modal-company input[name="position_manager"]').attr('disabled', true);
+                        $('#modal-company input[name="rate"]').attr('disabled', true);
+                    }
+                    saveCompanyForm = $('#form-company-edit').serialize();
+                }
+            });
+        });
+
+        let innData = '';
+        $('#submit-id-find-inn').on('click', function() {
+            let dataToSend = {
+                inn: $('#id_inn').val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/inn',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {
+                    $('.result-find').hide();
+                    $('.error-message').html('');
+                    $('.spinner-border').show();
+                },
+                success: function(data) {
+                    $('#button-id-fill-inn').show();
+                    $('#result-company-name').text(data.company_name);
+                    $('#result-company-inn').text(data.company_inn);
+                    $('#result-company-ogrn').text(data.company_ogrn);
+                    $('#result-full-address').text(data.full_address);
+                    $('#result-fio-manager').text(data.fio_manager);
+                    $('.result-find').show();
+                    $('.spinner-border').hide();
+                    innData = data;
+                },
+                error: function(data){
+                    $('.spinner-border').hide();
+                    $('#button-id-fill-inn').hide();
+                    $('.error-message').html(
+                        '<div class="alert alert-danger text-center">Не удалось найти организацию по введеному ИНН!</div>'
+                    );
+                }
+            });
+        });
+        $('#button-id-fill-inn').on('click', function() {
+            $('#modal-inn').modal('hide');
+
+            $('#modal-company input[name="company_name"]').val(innData.company_name);
+            $('#modal-company input[name="company_inn"]').val(innData.company_inn);
+            $('#modal-company input[name="company_ogrn"]').val(innData.company_ogrn);
+            $('#modal-company input[name="fio_manager"]').val(innData.fio_manager);
+            $('#modal-company input[name="position_manager"]').val(innData.position_manager);
+            $('#modal-company input[name="full_address"]').val(innData.full_address);
+            $('#modal-company input[name="full_company_name"]').val(innData.full_company_name);
+        });
+        
+        $('#button-id-company-save').on('click', function() {
+            $('#modal-company input[name="fio_manager"]').attr('disabled', false);
+            $('#modal-company input[name="position_manager"]').attr('disabled', false);
+         });
+
+        $('#modal-company').on('hide.bs.modal', function(){
+            if ($('#form-company-edit').serialize() !== saveCompanyForm) {
+                $('#msg-edit').modal('show');
+                $('#edit-save').on('click', function() {
+                   $('#button-id-company-save').click();
+                });
+            }
+        });
+        /* --- */
+
+        /* Форма редактирования реквизитов Банков */
+        let saveBankForm = '';
+        $('#button-id-bank-edit').on('click', function() {
+            let dataToSend = {
+                bank_name: '{{ bank.bank_name }}',
+                inn_bank: '{{ bank.inn_bank }}',
+                bik_bank: '{{ bank.bik_bank }}',
+                kpp: '{{ bank.kpp }}',
+                correspondent_acc: '{{ bank.correspondent_acc }}',
+                checking_acc: '{{ bank.checking_acc }}',
+                action: 'bank_edit',
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/company',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {},
+                success: function(data) {
+                    $('#modal-bank input[name="bank_name"]').val(data.bank_name);
+                    $('#modal-bank input[name="inn_bank"]').val(data.inn_bank);
+                    $('#modal-bank input[name="kpp"]').val(data.kpp);
+                    $('#modal-bank input[name="bik_bank"]').val(data.bik_bank);
+                    $('#modal-bank input[name="correspondent_acc"]').val(data.correspondent_acc);
+                    $('#modal-bank input[name="checking_acc"]').val(data.checking_acc);
+                },
+                error: function(data){},
+                complete: function () {
+                    saveBankForm = $('#form-bank-edit').serialize();
+                }
+            });
+        });
+
+        let bikData = '';
+        $('#submit-id-find-bik').on('click', function() {
+            let dataToSend = {
+                bik: $('#id_bik').val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/bik',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {
+                    $('.result-find').hide();
+                    $('.error-message').html('');
+                    $('.spinner-border').show();
+                    $('#button-id-fill-bik').hide();
+                },
+                success: function(data) {
+                    $('#button-id-fill-bik').show();
+                    $('#result-bank-name').text(data.bank_name);
+                    $('#result-bank-inn').text(data.inn);
+                    $('#result-bank-bik').text(data.bik);
+                    $('#result-bank-kpp').text(data.kpp);
+                    $('#result-correspondent-acc').text(data.correspondent_acc);
+
+                    $('.result-find').show();
+                    $('.spinner-border').hide();
+                    bikData = data;
+                },
+                error: function(data){
+                    $('.spinner-border').hide();
+                    $('#button-id-fill-bik').hide();
+                    $('.error-message').html(
+                        '<div class="alert alert-danger text-center">Не удалось найти Банк по введеному БИК!</div>'
+                    );
+                }
+            });
+        });
+        $('#button-id-fill-bik').on('click', function() {
+            $('#modal-bik').modal('hide');
+            $('#modal-bank input[name="bank_name"]').val(bikData.bank_name);
+            $('#modal-bank input[name="inn_bank"]').val(bikData.inn);
+            $('#modal-bank input[name="kpp"]').val(bikData.kpp);
+            $('#modal-bank input[name="bik_bank"]').val(bikData.bik);
+            $('#modal-bank input[name="correspondent_acc"]').val(bikData.correspondent_acc);
+        });
+        $('#modal-bank').on('hide.bs.modal', function(){
+            if ($('#form-bank-edit').serialize() != saveBankForm) {
+                $('#msg-edit').modal('show');
+                $('#edit-save').on('click', function() {
+                   $('#button_id_bank_save').click();
+                });
+            }
+         });
+        /* --- */
+        
+        /* Форма редактирования реквизитов Представителей */
+        let modal_agent_add = {
+            id: '#modal-agent-add input[name="address"]',
+            empty_msg: 'Нет совпадений ... ',
+        };
+        AhunterSuggest.Address.Solid(modal_agent_add);
+
+        $('#modal-agent-add input[name="date_doc"]').attr('id','agent_add_date_doc');
+        $('#agent_add_date_doc').datepicker({
+            dateFormat: 'dd.mm.yy'
+        });
+
+        $('input[name="file_doc"]').change(function(){
+            $('label[for="id_file_doc"]').text(this.files[0].name);
+        });
+
+        let getIdMember = '';
+        $('tr #button-id-agent-description').on('click', function (){
+            let id_member = $(this).closest('tr').find('input[type="radio"]').val();
+            let dataToSend = {
+                id: id_member,
+                action: 'agent_edit',
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/company',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {},
+                success: function(data) {
+                    $('#modal-agent input[name="first_name"]').addClass('bg-light').prop('disabled', true).val(data.first_name);
+                    $('#modal-agent input[name="second_name"]').addClass('bg-light').prop('disabled', true).val(data.second_name);
+                    $('#modal-agent input[name="third_name"]').addClass('bg-light').prop('disabled', true).val(data.third_name);
+                    $('#modal-agent input[name="position"]').addClass('bg-light').prop('disabled', true).val(data.position);
+                    $('#modal-agent input[name="phone"]').addClass('bg-light').prop('disabled', true).val(data.phone);
+                    $('#modal-agent input[name="address"]').addClass('bg-light').prop('disabled', true).val(data.address);
+                    $('#modal-agent select[name="doc"]').addClass('bg-light').prop('disabled', true).val(data.doc);
+                    $('#modal-agent input[name="num_doc"]').addClass('bg-light').prop('disabled', true).val(data.num_doc);
+                    $('#modal-agent input[name="date_doc"]').addClass('bg-light').prop('disabled', true).val(data.date_doc);
+                    $('#modal-agent .custom-file').html('<span><a href="{{ MEDIA_URL }}' + data.file_doc + '">' + data.file_doc +
+                        '</a></span>');
+                    getIdMember = data.id;
+                },
+                error: function(data){},
+                complete: function() {}
+            });
+        });
+        $('#button-id-agent-edit').on('click', function (){
+            let dataToSend = {
+                id: getIdMember,
+                action: 'agent_edit',
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/company',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {},
+                success: function(data) {
+                    $('#modal-agent-add input[name="first_name"]').val(data.first_name);
+                    $('#modal-agent-add input[name="second_name"]').val(data.second_name);
+                    $('#modal-agent-add input[name="third_name"]').val(data.third_name);
+                    $('#modal-agent-add input[name="position"]').val(data.position);
+                    $('#modal-agent-add input[name="phone"]').val(data.phone);
+                    $('#modal-agent-add input[name="address"]').val(data.address);
+                    $('#modal-agent-add select[name="doc"]').val(data.doc);
+                    $('#modal-agent-add input[name="num_doc"]').val(data.num_doc);
+                    $('#modal-agent-add input[name="date_doc"]').val(data.date_doc);
+                    $('#modal-agent-add .custom-file').html('<input type="file" name="file_doc" ' +
+                        'class="custom-file-input" id="id_file_doc" lang="ru">' +
+                        '<label class="custom-file-label" for="id_file_doc">'+data.file_doc+'</label>')
+                    $('<input>').attr({
+                        type: 'hidden',
+                        id: 'id_edit',
+                        name: 'id_edit',
+                        value: data.id
+                    }).appendTo('#form-agent-edit');
+                },
+                error: function(data){},
+                complete: function() {}
+            });
+        });
+        $('tr #button-id-agent-delete').on('click', function (){
+            let id_member = $(this).closest('tr').find('input[type="radio"]').val();
+            $('#modal-yes').on('click', function() {
+                let dataToSend = {
+                    id: id_member,
+                    action: 'agent_delete',
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                };
+
+                $.ajax({
+                    url: '/app/company',
+                    type: 'POST',
+                    data: dataToSend,
+                    dataType: 'json',
+                    beforeSend: function() {},
+                    success: function(data) {},
+                    error: function(data){},
+                    complete: function () {
+                        window.location.href = '{% url 'app:company_agent' %}'
+                    }
+                });
+             });
+        });
+        $('[name="id_agent"]').on('change', function() {
+            let id = $('[name="id_agent"]:checked').val();
+            let fio = $(this).closest('tr').find('td:eq(1)').text();
+            $('#fio_info').text(fio);
+            $('#msg-info').modal('show');
+            $('#modal-ok').on('click', function() {
+                let dataToSend = {
+                    id: id,
+                    action: 'agent_update_active',
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                };
+
+                $.ajax({
+                    url: '/app/company',
+                    type: 'POST',
+                    data: dataToSend,
+                    dataType: 'json',
+                    beforeSend: function() {},
+                    success: function(data) {},
+                    error: function(data){},
+                    complete: function () {}
+                });
+            });
+        });
+        
+        let saveAgentForm = '';
+
+
+        $('input[name="ustav"]').change(function(){
+            $('label[for="id_ustav"]').text(this.files[0].name);
+        });
+
+        $('input[name="inn"]').change(function(){
+            $('label[for="id_inn"]').text(this.files[0].name);
+        });
+
+        $('input[name="ogrn"]').change(function(){
+            $('label[for="id_ogrn"]').text(this.files[0].name);
+        });
+
+        $('input[name="yegryul"]').change(function(){
+            $('label[for="id_yegryul"]').text(this.files[0].name);
+        });
+
+        $('#button-id-scan-edit').on('click', function (){
+            let dataToSend = {
+                action: 'scan_edit',
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+
+            $.ajax({
+                url: '/app/company',
+                type: 'POST',
+                data: dataToSend,
+                dataType: 'json',
+                beforeSend: function() {},
+                success: function(data) {
+                    $('label[for="id_ustav"]').text(data.ustav);
+                    $('label[for="id_inn"]').text(data.inn);
+                    $('label[for="id_ogrn"]').text(data.ogrn);
+                    $('label[for="id_yegryul"]').text(data.yegryul);
+                    $('#form-scan input[name="id_edit"]').val(data.id)
+
+                },
+                error: function(data){},
+                complete: function() {}
+            });
+        });
+        $('tr #button-id-scan-delete').on('click', function (){
+            let key = $(this).closest('tr').find('td:eq(1)').attr('data');
+            $('#modal-yes').on('click', function() {
+                let dataToSend = {
+                    field: key,
+                    action: 'scan_delete',
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                };
+
+                $.ajax({
+                    url: '/app/company',
+                    type: 'POST',
+                    data: dataToSend,
+                    dataType: 'json',
+                    beforeSend: function() {},
+                    success: function(data) {},
+                    error: function(data){},
+                    complete: function () {
+                        window.location.href = '{% url 'app:company_scan' %}'
+                    }
+                });
+             });
+        });
+
+        $('tr #button-id-scan-file').on('click', function (){
+            let filename = $(this).closest('tr').find('td:eq(1)').text();
+            $('#modal-file .modal-title').text(filename);
+            $('#modal-file .modal-body embed').attr('src', '{{ MEDIA_URL }}' + '/' + filename);
+        });
+
+
+
+    });
+    </script>
+
+{% endblock %}

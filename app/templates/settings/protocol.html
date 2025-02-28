@@ -1,0 +1,74 @@
+{% extends "base_generic.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+    <div class="container">
+    <h3>Протоколы собраний</h3>
+    {% if err_msg %}
+        <p align="center">{{ err_msg }}</p>
+    {% elif form %}
+        {% crispy form %}
+    {% else %}
+        <table class="table table-hover mt-3 table-sm text-muted table-bordered">
+            <thead>
+            <tr>
+                <th scope="col" style="border-bottom: 0px;">№ Протокола</th>
+                <th scope="col" style="border-bottom: 0px;">Дата принятия</th>
+                <th scope="col" style="border-bottom: 0px;">Окончание</th>
+                <th scope="col" style="border-bottom: 0px;">Размер взноса</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for data in dataset %}
+            <tr onclick="document.location = '{% url 'app:protocol_edit' id=data.id %}';">
+                <td>{{ data.number }}</td>
+                <td>{{ data.date_start }}</td>
+                <td>{{ data.date_finish }}</td>
+                <td>{{ data.renta }}</td>
+            </tr>
+            {% empty %}
+                <tr><td colspan="4" align="center">В базе данных нет Протоколов собрания</td></tr>
+            {%  endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'app:protocol_add' %}">
+            <button class="btn btn-primary mb-5 pull-right" type="submit">Добавить</button>
+        </a>
+    {% endif %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+    <script>
+    /* Локализация datepicker */
+    $.datepicker.regional['ru'] = {
+        closeText: 'Закрыть',
+        prevText: 'Предыдущий',
+        nextText: 'Следующий',
+        currentText: 'Сегодня',
+        monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+        dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+        dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+        dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+        weekHeader: 'Не',
+        dateFormat: 'dd.mm.yy',
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: ''
+    };
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+
+    $(document).ready(function() {
+        $('#id_date_start').datepicker({ dateFormat: 'dd.mm.yy' });
+        $('#id_date_finish').datepicker({ dateFormat: 'dd.mm.yy' });
+    });
+    </script>
+{% endblock %}

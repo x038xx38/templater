@@ -1,0 +1,88 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'app/multi-form/css/multi-style.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+<div class="container">
+<h3>Досудебная претензия</h3>
+<!-- JQUERY STEP -->
+<div class="wrapper">
+    <form id="form" method="post" action="{% url 'app:pretrial_tmp' %}">
+        {% csrf_token %}
+        <div id="wizard">
+            <!-- SECTION 1 -->
+            <h4></h4>
+            <section>
+                <h4>Должник</h4>
+               <div class="form-row">
+                    <div class="col">
+                        {{ pretrial_data.member_name|as_crispy_field }}
+                    </div>
+                    <div class="col">
+                        {{ pretrial_data.address_land|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        {{ pretrial_data.num_land|as_crispy_field }}
+                    </div>
+                    <div class="col">
+                        {{ pretrial_data.cadastr_num|as_crispy_field }}
+                    </div>
+                </div>
+                <hr/>
+                <div class="form-row">
+                    <div class="col">
+                        {{ pretrial_data.amount_debt|as_crispy_field }}
+                    </div>
+                    <div class="col">
+                        {{ pretrial_data.start_debt|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        {{ pretrial_data.end_debt|as_crispy_field }}
+                    </div>
+                    <div class="col">
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2 -->
+            <h4></h4>
+            <section>
+                <h4>Протокол собрания</h4>
+                <div class="form-row">
+                    <div class="col">
+                        {{ pretrial_data.protocol_create|as_crispy_field }}
+                    </div>
+                    <div class="col">
+                        {{ pretrial_data.protocol_period|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        {{ pretrial_data.protocol_renta|as_crispy_field }}
+                    </div>
+                    <div class="col">
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </form>
+</div>
+
+</div>
+
+{% block scripts %}
+    <script src="{% static 'app/multi-form/js/jquery.steps.js' %}"></script>
+    <script src="{% static 'app/multi-form/js/pretrial_form.js' %}"></script>
+{% endblock %}
+
+{% endblock %}

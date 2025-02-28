@@ -1,0 +1,144 @@
+{#{% extends "settings/member.html" %}#}
+{% load crispy_forms_tags %}
+{#{% load static %}#}
+{#{% block styles %}#}
+{#    <link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />#}
+{#    <link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />#}
+{#{% endblock %}#}
+
+<!-- modal - add new member -->
+<div class="modal modal_outer first_modal fade" id="modal-add-member" tabindex="-1" role="dialog" aria-labelledby="modal-add-member" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<form method="post" action="/app/member/add" id="form-add-member">
+			<div class="modal-content ">
+				<div class="modal-header">
+					<h3 class="modal-title">Добавить физическое лицо</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="close">
+						<i class="fas fa-times"></i></button>
+				</div>
+					<div class="modal-body">
+						{% crispy form_member %}
+{#							<div class="form-row">#}
+{#								<div class="form-group col-sm-6">#}
+{#									<label for="fio">ФИО: <span class="text-danger">*</span></label>#}
+{#									<input type="text" class="form-control" required="" id="fio" name="fio">#}
+{#								</div>#}
+{#									<div class="form-group  col-sm-6">#}
+{#											<label for="phone">Номер телефона:</label>#}
+{#											<input type="text" class="form-control" id="phone" name="phone" placeholder="+7 (000) 000-00-00">#}
+{#									</div>#}
+{#								<div class="form-group col-sm-12">#}
+{#									<label for="address">Адрес регистрации: <span class="text-danger">*</span></label>#}
+{#									<input type="text" class="form-control" required="" id="address" name="address">#}
+{#								</div>#}
+{#								 <div class="form-group col-sm-6">#}
+{#										 <div class="custom-control custom-switch custom-switch-md">#}
+{#												<input type="checkbox" class="custom-control-input" id="status" name="status" checked>#}
+{#												<label class="custom-control-label pt-1" for="status">Член товарищества</label>#}
+{#											</div>#}
+{#								 </div>#}
+{#							</div>#}
+							<div class="row mt-3">
+									<div class="col">
+											<h4>Участки</h4>
+									</div>
+									<div class="col-auto">
+											<button class="btn btn-primary" id="add_land" data-toggle="modal" data-target="#modal_add_land">
+													<i class="fas fa-plus-circle"></i>
+											</button>
+
+											<div class="dropdown">
+													<button name="bind_new" id="bind_new" class="btn btn-primary">
+															<i class="fas fa-link"></i>
+													</button>
+													<div id="myDropdown" class="dropdown-content">
+															<input class="form-control border m-2 w-auto" type="text" placeholder="Поиск ..." id="myInput" onkeyup="filterFunction()">
+													</div>
+											</div>
+									</div>
+							</div>
+							<div class="row">
+								<table id="land-list" class="table mt-4 table-sm text-muted table-bordered">
+								<thead>
+									<tr>
+										<th scope="col" style="width: 40%">Кадастровый номер</th>
+										<th scope="col">Адрес участка</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+								</table>
+							</div>
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+						<button type="submit" class="btn btn-primary" id="submit_btn">Сохранить</button>
+					</div>
+			</div>
+	</form>
+	</div>
+</div><!-- modal -->
+
+<div class="modal modal_outer second_modal fade" id="modal_add_land" tabindex="-1" role="dialog" aria-labelledby="modal_add_land" aria-hidden="true" >
+    <div class="modal-dialog">
+        <form method="post" action="/app/land/add" id="save_land">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h3 class="modal-title">Новый участок</h3>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                      <div class="form-group col-sm-6">
+                        <label for="number">Номер участка: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" required="" id="number" name="number">
+                      </div>
+                        <div class="form-group  col-sm-6">
+                            <label for="kadastr">Кадастровый номер:<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" required="" id="kadastr_number" name="kadastr_number" placeholder="XX:XX:ХХХХХХХ:ХХХХ">
+                        </div>
+                      <div class="form-group col-sm-12">
+                        <label for="land_address">Адрес участка: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" required="" id="address" name="address">
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+                  <button type="submit" class="btn btn-primary" id="add_land_btn">Сохранить</button>
+                </div>
+            </div>
+        </form>
+    </div><!-- modal-dialog -->
+</div><!-- modal -->
+
+<div class="modal modal_outer first_modal fade" id="modal_card_member" tabindex="-1" role="dialog" aria-labelledby="modal_card_member" aria-hidden="true" >
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<ul class="nav btn-sm nav-pills mb-1" id="pills-tab" role="tablist">
+					<li class="nav-item">
+						<a class="nav-link active" id="pills-profile-tab" data-toggle="pill" href="#profile" role="tab" aria-controls="pills-profile" aria-selected="true">ПРОФИЛЬ</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="pills-credits-tab" data-toggle="pill" href="#credits" role="tab" aria-controls="pills-credits" aria-selected="false">ЗАДОЛЖЕННОСТЬ</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="pills-work-tab" data-toggle="pill" href="#work" role="tab" aria-controls="pills-work" aria-selected="false">ДЕЛОПРОИЗВОДСТВО</a>
+					</li>
+				</ul>
+				<button type="button" class="close" data-dismiss="modal" aria-label="close">
+						<i class="fas fa-times"></i>
+				</button>
+			</div>
+			<div class="modal-body">
+				 {% include 'modals/card-box.html' %}
+			</div>
+		</div>
+	</div><!-- modal-dialog -->
+</div><!-- modal -->
+

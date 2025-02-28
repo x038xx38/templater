@@ -1,0 +1,651 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block styles %}
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+{% block content %}
+	<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>{{ header }}</h3>
+		<table id="member-list" class="table mt-4 table-sm text-muted table-bordered">
+			<thead>
+				<tr class="text-uppercase text-sm-center">
+					<th style="width: 30px;">#</th>
+					<th>Фио</th>
+					<th>Адрес участка</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for data in dataset %}
+				<tr id="{{ data.id }}">
+{#					{{ forloop.counter }} {{ forloop.counter0|add:children.start_index}}#}
+					<td class="text-sm-center">{{ forloop.counter }}</td>
+					<td>{{ data.members }}</td>
+					<td>
+						{% for row in data.lands %}
+							 - {{ row.land_address }}<br />
+						{% empty %}
+						{% endfor %}
+					</td>
+					<td class="text-sm-center" style="width: 30px;"><span data-toggle="modal" data-target="#modal-desc-member">
+									<a href="#" title="Подробная информация" data-toggle="tooltip" >
+									<span id="btn-desc-member"><i class="far fa-window-maximize"></i></span></a></span></td>
+					<td class="text-sm-center" style="width: 30px;"><span data-toggle="modal" data-target="#msg-delete">
+							<a href="#" title="Удалить запись" data-toggle="tooltip">
+								<span id="btn-del-member"><i class="far fa-trash-alt"></i></span></a></span></td>
+				</tr>
+				{%  endfor %}
+			</tbody>
+		</table>
+		<div class="modal modal_outer first_modal fade" id="modal-add-member" tabindex="-1" role="dialog"
+				 aria-labelledby="modal-add-member" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<form method="post" action="/app/member/add" id="form-add-member">
+					<div class="modal-content ">
+						<div class="modal-header">
+							<h3 class="modal-title">Добавить физическое лицо</h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i></button>
+						</div>
+						<div class="modal-body">
+							{% crispy form_member %}
+							<div class="row mt-3">
+								<div class="col">
+									<h4>Участки</h4>
+								</div>
+								<div class="col-auto">
+									<span title="Добавить новый участок" data-toggle="tooltip">
+									<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-add-land">
+										<i class="fas fa-plus-circle"></i>
+									</button></span>
+									<div class="dropdown">
+										<span title="Прикрепить участок" data-toggle="tooltip">
+										<button name="bind_new" id="bind_new" class="btn btn-primary btn-sm">
+												<i class="fas fa-link"></i>
+										</button></span>
+										<div id="myDropdown" class="dropdown-content">
+												<input class="form-control border m-2 w-auto" type="text" placeholder="Поиск ..."
+															 id="myInput" onkeyup="filterFunction()">
+										</div>
+									</div>
+								</div>
+							</div>
+							<table id="add-member-land-list" class="table table-sm text-muted">
+							<thead>
+								<tr class="text-sm-left">
+									<th>Адрес участка</th>
+									<th>Дата владения</th>
+									<th></th>
+								</tr>
+							</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+							<button class="btn btn-primary" id="btn-add-member">Сохранить</button>
+						</div>
+					</div>
+			</form>
+			</div>
+		</div>
+		<div class="modal modal_outer second_modal fade" id="modal-add-land" tabindex="-1" role="dialog"
+				 aria-labelledby="modal-add-land" aria-hidden="true" >
+			<div class="modal-dialog">
+				<form method="post" action="/app/land/add" id="form-add-land" name="form-add-land">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3 class="modal-title">Новый участок</h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+						<div class="modal-body">
+							{% crispy form_land %}
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+							<button type="button" class="btn btn-primary" id="btn-add-land">Сохранить</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="modal modal_outer first_modal fade" id="modal-desc-member" tabindex="-1" role="dialog"
+			 aria-labelledby="modal-desc-member" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title" id="title-fio">Фамилия Имя Отчество</h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						<div class="card-box">
+							<div class="card mb-4">
+								<div class="card-body">
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">ФИО: </div>
+										<div class="col-md-8" id="fio"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Статус: </div>
+										<div class="col-md-8" id="status"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Адрес регистрации: </div>
+										<div class="col-md-8" id="address"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Номер телефона: </div>
+										<div class="col-md-8" id="phone"></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-md-4 text-muted font-weight-bold">Электронная почта: </div>
+										<div class="col-md-8" id="email"></div>
+									</div>
+								</div>
+							</div>
+							<div id="accordion">
+
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+							<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+						<button type="button" class="btn btn-primary" name="btn-desc-member-edit" id="btn-desc-member-edit">
+							<i class="fas fa-edit"></i>&nbsp;&nbsp;Редактировать</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="msg-delete" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header border-bottom-0">
+						<h5 class="modal-title"></h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body text-center mt-4 mb-4">
+						<h5>Вы действительно хотите удалить запись?</h5>
+					</div>
+					<div class="modal-footer border-top-0">
+						<button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+						<button type="button" class="btn btn-primary float-right" style="width: 120px;" id="modal-yes">Да</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block scripts %}
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<script src="{% static 'app/multi-form/js/ahunter_suggest.js' %}"></script>
+	<script>
+		$.datepicker.regional['ru'] = {
+        closeText: 'Закрыть',
+        prevText: 'Предыдущий',
+        nextText: 'Следующий',
+        currentText: 'Сегодня',
+        monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+        dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+        dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+        dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+        weekHeader: 'Не',
+        dateFormat: 'dd.mm.yy',
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: ''
+    };
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+
+
+		function IsEmail(email) {
+			let regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
+			return regex.test(email);
+		}
+
+		$(document).on('click', function (e) {
+			if (e.target != $('.dropdown-content')) {
+					$('.dropdown-content').fadeOut();		// скрываем выпадающий список, при клике в любом месте
+			}
+    });
+    $(document).ready(function () {
+			let member_list_table = $('#member-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-3'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 mt-3'p>>",
+				language: {
+					paginate: {
+						first: "Первая",
+						previous: '<i class="fas fa-angle-double-left"></i>',
+						next: '<i class="fas fa-angle-double-right"></i>',
+						last: "Последняя"
+					},
+					info: "Записи с _START_ до _END_ из _TOTAL_ записей",
+					infoFiltered: "(отфильтровано из _MAX_ записей)",
+					loadingRecords: "Загрузка записей...",
+					zeroRecords: "Записи отсутствуют.",
+					infoEmpty: "",
+					processing: "Подождите...",
+					search: '',
+					lengthMenu: "Показать _MENU_ записей",
+					emptyTable: "Нет записей в справочнике"
+				},
+				buttons: [
+					{
+						text: '<span title=\'Новая запись\' data-toggle=\'tooltip\'>' +
+								'<i class="fas fa-user-plus"></i>&nbsp;&nbsp;Создать</span>',
+						className: 'btn btn-primary btn-sm float-right ml-2',
+						attr: {
+								'data-toggle': 'modal',
+								'data-target': '#modal-add-member',
+							}
+					},
+					{
+						text: '<span title=\'Загрузить данные\' data-toggle=\'tooltip\'>' +
+								'<i class="fas fa-file-upload"></i>&nbsp;&nbsp;Загрузить</span>',
+						className: 'btn btn-primary btn-sm float-right',
+						attr: {
+								'data-toggle': 'modal',
+								'data-target': '#modal-create-fee',
+							}
+				}],
+				ordering: true,
+			 	columnDefs: [{
+					targets: [3, 4],
+      		orderable: false
+				}],
+				order: [[0, 'asc']]
+			});
+			let test = '<div class="input-group">' +
+					'<input class="form-control form-control-sm" id="search-member-list" type="search" placeholder="Поиск" aria-controls="member-list">' +
+					'<span class="input-group-append">' +
+					'<button class="btn btn-sm btn-outline border-left-0 border" type="button"><span class="text-secondary"><i class="fas fa-search"></i></span></button></span></div>'
+			let test2 = '<button type="submit"><i class="fa fa-search"></i></button>'
+			$('.dataTables_filter').html(test)
+			// #myInput is a <input type="text"> element
+			$('#search-member-list').on( 'keyup', function () {
+				member_list_table.search( this.value ).draw();
+			});
+
+			$('#add-member-land-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7 mt-3'>>",
+				ordering: false,
+				language: {
+						emptyTable: "Нет участков в собственности"
+					},
+			 });
+
+			$('.dataTables_paginate').addClass('pagination-sm');
+			$('#id_date_of_birth').datepicker({ dateFormat: 'dd.mm.yy' });
+			$('#id_date_of_issue').datepicker({dateFormat: 'dd.mm.yy',});
+
+			$('#phone').mask('+7 (000) 000-00-00');
+			$('#kadastr_number').mask('00:00:0000000:0000');
+			$('[data-toggle="tooltip"]').tooltip();
+
+			$('#btn-add-land').on('click', function(e) {
+				let form = $('#form-add-land');
+    		let actionUrl = form.attr('action');
+
+
+				$.ajax({
+					type: 'POST',
+					url: actionUrl,
+					data: form.serialize(), // сериализуем элементы формы
+					dataType: 'json',
+					success: function(data) {
+						{#alert(data.id + ' - ' + data.kadastr_number);#}
+						console.log(data); // ответ сервера в консоль
+						let row = `<tr>
+												<td class="test_id" hidden>${data.id}</td>
+												<td>${data.kadastr_number}</td>
+												<td>${data.land_address}</td>
+												<td class="text-right">
+													<a href="#"><span id="trash" title="Открепить участок" data-toggle="tooltip">
+														<i class="far fa-trash-alt"></i></span>
+													</a>
+												</td></tr>`
+						let check = $('#add-member-land-list > tbody > tr:first-child').text().trim();
+						if (check == 'Нет участков в собственности') {
+							$('#add-member-land-list > tbody > tr:first-child').remove();
+							$('#add-member-land-list > tbody').append(row);
+						} else {
+							$('#add-member-land-list > tbody:last-child').append(row);
+						}
+						$('#modal-add-land').modal('hide');
+						e.stopPropagation();
+            e.preventDefault();
+						{#$('.dropdown-content').fadeOut();#}
+					},
+					complete: function () {
+
+					}
+				});
+			 });
+
+			// данная функция не позволяет скрыться выпадающему списку
+			// когда клик происходит по полю поиска
+			// по идеии ее нужно объединить со следующей функцией
+			$('.dropdown-content').on('click', function (e) {
+				e.stopPropagation();
+				$('.dropdown-content').fadeIn();
+		 	});
+			$('#myDropdown').on('click', 'a.row', function(){
+				let id = $(this).attr('id');
+				$.ajax({
+					url: '/app/land/'+ id +'/get',
+					dataType: 'json',
+					type: 'POST',
+					beforeSend: function (xhr) {
+							xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+							xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+					 },
+					success: function (data){
+						let row = `<tr>
+												<td hidden>${data.id}</td>
+												<td>${data.land_address}</td>
+												<td></td>
+												<td class="text-right">
+													<a href="#"><span id="trash" title="Открепить участок" data-toggle="tooltip">
+														<i class="far fa-trash-alt"></i></span>
+													</a>
+												</td></tr>`
+						let check = $('#add-member-land-list > tbody > tr:first-child').text().trim();
+						if (check == 'Нет участков в собственности') {
+							$('#add-member-land-list > tbody > tr:first-child').remove();
+							$('#add-member-land-list > tbody').append(row);
+						} else {
+							$('#add-member-land-list > tbody:last-child').append(row);
+						}
+						{#e.stopPropagation();#}
+						{#$('.dropdown-content').fadeOut();#}
+						}
+				 });
+			});
+
+			// открепляем Участки во вспомогательной таблице
+			$('#add-member-land-list').on('click', '#trash', function (){
+				$(this).closest('tr').remove();
+			});
+
+			$('#form-add-member').on('submit',function(e) {
+				e.preventDefault();
+				let form = $('#form-add-member');
+				let actionUrl = $(this).attr('action');
+				let land_id = [];
+				$('#add-member-land-list tr td:first-child').each(function() {
+					land_id.push($(this).text())
+				});
+
+				let email = $('#modal-add-member input[name="email"]').val()
+				if ((IsEmail(email) == false) && (email.length > 0)) {
+					$('#modal-add-member input[name="email"]').addClass('is-invalid');
+					return false;
+				}
+
+				let objLand = { lands: land_id }
+				$.ajax({
+					type: 'POST',
+					url: actionUrl,
+					{#data: {#}
+					{#	'first_name': $('#modal-add-member input[name="first_name"]').val(),#}
+					{#	'second_name': $('#modal-add-member input[name="second_name"]').val(),#}
+					{#	'third_name': $('#modal-add-member input[name="third_name"]').val(),#}
+					{#	'status': $('#modal-add-member select[name="status"] option:selected').val(),#}
+					{#	'address': $('#modal-add-member input[name="address"]').val(),#}
+					{#	'phone': $('#modal-add-member input[name="phone"]').val(),#}
+					{#	'email': $('#modal-add-member input[name="email"]').val(),#}
+					{#	'lands': land_id,#}
+					{#	csrfmiddlewaretoken: '{{ csrf_token }}',#}
+					{# },#}
+					data: form.serialize() + '&' + decodeURIComponent($.param(objLand)),
+					success: function(data) {
+							window.location.href = '{% url 'app:member_list' %}'
+					},
+					complete: function () {}
+				});
+			});
+
+			$('#member-list').on('click', 'tr #btn-del-member', function (){
+				let id = $(this).closest('tr').attr('id');
+				$('#modal-yes').on('click', function() {
+						$.get('/app/member/' + id + '/del', function(data){
+							window.location.href = '{% url 'app:member_list' %}'
+						});
+				 });
+			});
+			let edit_data = ''
+			$('#member-list').on('click', 'tr #btn-desc-member', function (){
+				let id = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/member/' + id + '/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						let fio = data.second_name + ' ' + data.first_name + ' ' + data.third_name
+						$('#title-fio').text(fio);
+						$('.card-body #fio').text(fio);
+						$('.card-body #status').text(data.status_value);
+						$('.card-body #address').text(data.address);
+						$('.card-body #phone').text(data.phone);
+						$('.card-body #email').text(data.email);
+
+						let list = JSON.parse(data.land_list);
+						let accord = '';
+						for(let i=0; i<list.length; i++) {
+							let html = `<div class="card mb-3">
+									<div class="card-header" id="heading_${list[i].pk}">
+										<h5 class="mb-0">
+											<button class="btn btn-link" data-toggle="collapse" data-target="#collapse_${list[i].pk}"
+															aria-expanded="true" aria-controls="collapseOne">
+												${list[i].fields.land_address}
+											</button>
+										</h5>
+									</div>
+									<div id="collapse_${list[i].pk}" class="collapse" aria-labelledby="heading_${list[i].pk}" data-parent="#accordion">
+										<div class="card-body">
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Номер участка: </div>
+												<div class="col-md-8" id="number">${list[i].fields.number}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Кадастровый номер: </div>
+												<div class="col-md-8" id="kadastr_number">${list[i].fields.kadastr_number}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Адрес участка: </div>
+												<div class="col-md-8" id="land_address">${list[i].fields.land_address}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Документы: </div>
+												<div class="col-md-8" id="attachment">${list[i].fields.attachment}</div>
+											</div>
+										</div>
+									</div>
+								</div>`;
+							accord = accord + html;
+							console.log(list[i].fields.kadastr_number)
+						}
+						$('#accordion').html(accord);
+
+						let ownership = JSON.parse(data.ownership);
+            for(let i=0; i<ownership.length; i++){
+                let row =`		<hr />
+																							<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">В собственности: </div>
+												<div class="col-md-8" id="hold">с ${ownership[i].fields.start_hold} по ${ownership[i].fields.end_hold}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Документы: </div>
+												<div class="col-md-8" id="attachment">${ownership[i].fields.attachment}</div>
+											</div>
+											<div class="row mb-2">
+												<div class="col-md-4 text-muted font-weight-bold">Комментарий: </div>
+												<div class="col-md-8" id="comment">${ownership[i].fields.comment}</div>
+											</div>`;
+                let set = `#collapse_${ownership[i].fields.land} .card-body`
+								{#alert(set)#}
+								$(set).append(row);
+						}
+						return edit_data=data;
+					},
+				});
+			});
+			$('#btn-desc-member-edit').on('click', function (){
+				$('#modal-desc-member').modal('hide');
+        $('#modal-add-member .modal-title').text('Редактирование');
+
+				$('#modal-add-member input[name="first_name"]').val(edit_data.first_name);
+				$('#modal-add-member input[name="second_name"]').val(edit_data.second_name);
+				$('#modal-add-member input[name="third_name"]').val(edit_data.third_name);
+				//$("select[name=foo] option[value=bar]).attr('selected','selected');
+				$('#modal-add-member select[name="status"]').val(edit_data.status).change();
+				$('#modal-add-member input[name="address"]').val(edit_data.address);
+				$('#modal-add-member input[name="series_number_doc"]').val(edit_data.series_number_doc);
+				$('#modal-add-member input[name="division_code"]').val(edit_data.division_code);
+
+				if (edit_data.date_of_issue !== null){
+					let dateOfIssue = new Date(Date.parse(edit_data.date_of_issue));
+					$('#modal-add-member input[name="date_of_issue"]').val($.datepicker.formatDate('dd.mm.yy', dateOfIssue));
+				} else {
+					$('#modal-add-member input[name="date_of_issue"]').val('');
+				}
+
+				$('#modal-add-member textarea[name="issued"]').val(edit_data.issued);
+
+				if (edit_data.date_of_birth !== null){
+					let dateOfBirth = new Date(Date.parse(edit_data.date_of_birth));
+					$('#modal-add-member input[name="date_of_birth"]').val($.datepicker.formatDate('dd.mm.yy', dateOfBirth));
+				} else {
+					$('#modal-add-member input[name="date_of_birth"]').val('');
+				}
+
+				$('#modal-add-member input[name="place_of_birth"]').val(edit_data.place_of_birth);
+
+				$('#modal-add-member input[name="phone"]').val(edit_data.phone);
+				$('#modal-add-member input[name="email"]').val(edit_data.email);
+				$('<input>').attr({
+						type: 'hidden',
+						id: 'id_member',
+						name: 'id_member',
+						value: edit_data.id
+				}).appendTo('#form-add-member');
+
+				let list = JSON.parse(edit_data.land_list);
+				let row = '';
+				for(let i=0; i<list.length; i++) {
+						let html = `<tr><td hidden>${list[i].pk}</td>
+									<td>${list[i].fields.kadastr_number}</td><td>${list[i].fields.land_address}</td><td class="text-right">
+									<a href="#"><span id="trash" title="Открепить участок" data-toggle="tooltip">
+									<i class="far fa-trash-alt"></i></span></a></td></tr>`
+						row = row + html;
+				}
+				$('#add-member-land-list > tbody').html(row)
+		 		$('#modal-add-member').modal('show');
+			});
+
+      // ----------------
+
+			$('#id_division_code').focusout(function() {
+					$.ajax({
+						url: '/app/issued',
+						type: 'POST',
+						data: {
+							'division_code': $('#id_division_code').val(),
+						},
+						dataType: 'json',
+						beforeSend: function (xhr) {
+							xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+							xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+					 	},
+						success: function (response){
+							console.log(response);
+							$("textarea#id_issued").val(response.data);
+						}
+
+					});
+			});
+
+			$('#bind_new').on('click', function(e) {
+				$.ajax({
+					url: '/app/land/get',
+					dataType: 'json',
+					success: function (response) {
+							let select = '<input class="form-control border m-2 w-auto" type="text" ' +
+									'placeholder="Поиск ..." id="myInput" onkeyup="filterFunction()">';
+
+							if (response.lands.length > 0) {
+									for (let i = 0; i < response.lands.length; i++) {
+											select += '<a href="#" class="row" id="' + response.lands[i].id + '">' +
+																	response.lands[i].address + '</a>';
+									}
+									$('.dropdown-content').html(select + '</div>');
+							} else {
+									select += '<a href="#" class="row" id="1">Нет участков</a>';
+									$('.dropdown-content').html(select + '</div>');
+							}
+					},
+				});
+				e.stopPropagation();
+				$('.dropdown-content').fadeIn();
+				return false;
+			});
+			$('#save_land').submit(function() { // catch the form's submit event
+					$.ajax({ // create an AJAX call...
+							data: $(this).serialize(), // get the form data
+							type: $(this).attr('method'), // GET or POST
+							url: $(this).attr('action'), // the file to call
+							success: function(data) { // on success..
+									console.log('Response - ' + data);
+									$('#modal_add_land').modal('hide');
+							}
+					});
+					return false;
+			});
+    });
+
+    function filterFunction() {
+        let input, filter, ul, li, a, i;
+        input = document.getElementById('myInput');
+        filter = input.value.toUpperCase();
+        div = document.getElementById('myDropdown');
+        a = div.getElementsByTagName('a');
+        for (i = 0; i < a.length; i++) {
+            txtValue = a[i].textContent || a[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                a[i].style.display = '';
+            } else {
+                a[i].style.display = 'none';
+            }
+        }
+    }
+    let modalMember = {
+        id: 'id_address',
+        z_index: '9999',
+        empty_msg: 'Нет совпадений ... ',
+    };
+    AhunterSuggest.Address.Solid(modalMember);
+    let modalLand = {
+        id: 'id_land_address',
+        z_index: '9999',
+        empty_msg: 'Нет совпадений ... ',
+    };
+    AhunterSuggest.Address.Solid(modalLand);
+	</script>
+{% endblock %}

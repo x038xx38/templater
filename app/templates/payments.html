@@ -1,0 +1,340 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block styles %}
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+{% endblock %}
+{% block content %}
+	<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+		<h3>{{ header }}</h3>
+		<table id="payment-list" class="table mt-4 table-sm text-muted table-bordered">
+			<thead>
+				<tr class="text-uppercase text-sm-center">
+					<th style="width: 30px;">#</th>
+					<th>Участок</th>
+					<th>Общая сумма</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for data in dataset %}
+			<tr id="{{ data.land_id }}">
+				<td class="text-sm-center">{{ forloop.counter }}</td>
+				<td>{{ data.land__land_address }}</td>
+				<td>{{ data.total_sum }}</td>
+				<td class="text-sm-center" style="width: 30px;">
+					<span id="btn-description-payment" data-toggle="modal" data-target="#modal-description-payment">
+								<a href="#" title="Подробная информация" data-toggle="tooltip">
+								<i class="far fa-window-maximize"></i></a></span>
+				</td>
+				<td class="text-sm-center" style="width: 30px;">
+					<span data-toggle="modal" data-target="#msg-delete">
+						<a href="#" title="Удалить запись" data-toggle="tooltip">
+							<span id="btn-del-group-payment"><i class="far fa-trash-alt"></i></span></a></span></td>
+			</tr>
+			{%  endfor %}
+		</tbody>
+		</table>
+		<div class="modal modal_outer second_modal fade" id="modal-add-payment" tabindex="-1" role="dialog"
+		 aria-labelledby="modal-add-payment" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<form method="post" action="/app/payment/add" id="form-add-payment">
+					<div class="modal-content ">
+						<div class="modal-header">
+							<h3 class="modal-title">Новый платеж</h3>
+							<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<i class="fas fa-times"></i></button>
+						</div>
+						<div class="modal-body">
+							{% crispy form_payment %}
+						</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">Отменить</button>
+							<button type="submit" class="btn btn-primary" id="btn-add-payment">Сохранить</button>
+						</div>
+					</div>
+			</form>
+			</div>
+		</div>
+		<div class="modal modal_outer first_modal fade" id="modal-description-payment" tabindex="-1" role="dialog"
+			 aria-labelledby="modal-description-payment" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title" id="title-fio">Подробная информация</h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						<div class="row mt-3">
+							<div class="col">
+								<h4>История платежей</h4>
+							</div>
+							<div class="col-auto">
+								<span title="Добавить платеж" data-toggle="tooltip">
+								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-add-payment">
+									<i class="fas fa-plus-circle"></i>
+								</button></span>
+							</div>
+						</div>
+						<table id="land-payment-list" class="table table-sm text-muted" class="display" style="width:100%">
+							<thead>
+								<tr class="text-sm-left">
+									<th></th>
+									<th class="w-50">Дата платежа</th>
+									<th>Тип платежа</th>
+									<th>Сумма</th>
+									<th></th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+							<tfoot>
+								<tr class="text-sm-right">
+									<th></th>
+									<th class="w-50 text-sm-right">Итого:</th>
+									<th colspan="4"></th>
+								</tr>
+							</tfoot>
+							</table>
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+							<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade delete-msg" id="msg-delete" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header border-bottom-0">
+						<h5 class="modal-title"></h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+								<span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body text-center mt-4 mb-4">
+						<h5>Вы действительно хотите удалить запись?</h5>
+					</div>
+					<div class="modal-footer border-top-0">
+						<button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+						<button type="button" class="btn btn-primary float-right" style="width: 120px;" id="modal-yes">Да</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block scripts %}
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<script>
+		$.datepicker.regional['ru'] = {
+        closeText: 'Закрыть',
+        prevText: 'Предыдущий',
+        nextText: 'Следующий',
+        currentText: 'Сегодня',
+        monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+        monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+        dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+        dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+        dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+        weekHeader: 'Не',
+        dateFormat: 'dd.mm.yy',
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: ''
+    };
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+		$(document).ready(function (){
+			let payment_list = $('#payment-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-3'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 mt-3'p>>",
+				language: {
+					paginate: {
+						first: "Первая",
+						previous: '<i class="fas fa-angle-double-left"></i>',
+						next: '<i class="fas fa-angle-double-right"></i>',
+						last: "Последняя"
+					},
+					info: "Записи с _START_ до _END_ из _TOTAL_ записей",
+					infoFiltered: "(отфильтровано из _MAX_ записей)",
+					loadingRecords: "Загрузка записей...",
+					zeroRecords: "Записи отсутствуют.",
+					infoEmpty: "",
+					processing: "Подождите...",
+					search: '',
+					lengthMenu: "Показать _MENU_ записей",
+					emptyTable: "Нет записей в справочнике."
+				},
+				buttons: [{
+					text: '<span title=\'Новая запись\' data-toggle=\'tooltip\'>' +
+								'<i class="far fa-credit-card"></i>&nbsp;&nbsp;Добавить платеж</span>',
+					className: 'btn btn-primary btn-sm float-right ml-2',
+					attr: {
+							'data-toggle': 'modal',
+							'data-target': '#modal-add-payment',
+						}
+				}],
+				ordering: true,
+				columnDefs: [{
+					targets: [3, 4],
+					orderable: false
+				 }],
+			});
+			let input_search = `<div class="input-group">
+					<input class="form-control form-control-sm" id="search-payment-list" type="search" placeholder="Поиск"
+									aria-controls="payment-list"><span class="input-group-append">
+					<button class="btn btn-sm btn-outline border-left-0 border" type="button">
+					<span class="text-secondary"><i class="fas fa-search"></i></span></button></span></div>`
+			$('.dataTables_filter').html(input_search)
+			$('#search-payment-list').on('keyup', function (){
+				payment_list.search(this.value).draw();
+			});
+
+			let land_payments = $('#land-payment-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'B>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 mt-3'p>>",
+				language: {
+					paginate: {
+						first: "Первая",
+						previous: '<i class="fas fa-angle-double-left"></i>',
+						next: '<i class="fas fa-angle-double-right"></i>',
+						last: "Последняя"
+					},
+					info: "Записи с _START_ до _END_ из _TOTAL_ записей",
+					infoFiltered: "(отфильтровано из _MAX_ записей)",
+					loadingRecords: "Загрузка записей...",
+					zeroRecords: "Записи отсутствуют.",
+					infoEmpty: "",
+					processing: "Подождите...",
+					search: '',
+					lengthMenu: "Показать _MENU_ записей",
+					emptyTable: "Нет платежей по данному участку."
+				},
+				pageLength : 15,
+				ordering: false,
+				columnDefs: [{
+                    targets: [0],
+										className: "hide_column"
+				}],
+				footerCallback: function ( row, data, start, end, display ) {
+            let api = this.api();
+            let intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+						let total = api
+                .column(3)
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            let pageTotal = api
+                .column( 3, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+            $(api.column(3).footer()).html(pageTotal + ' руб.' + ' (Общая ' + total + ' руб.)');
+        }
+			 });
+			$('.dataTables_paginate').addClass('pagination-sm');
+			$('#id_date_payment').datepicker({ dateFormat: 'dd.mm.yy' });
+			payment_list.on('click', 'tr #btn-del-group-payment', function (){
+				let id_land = $(this).closest('tr').attr('id');
+				$('#modal-yes').on('click', function() {
+						$.get('/app/payment-group/' + id_land + '/del', function(data){
+							window.location.href = '{% url 'app:payment_list' %}'
+						});
+				 });
+			});
+			payment_list.on('click', 'tr #btn-description-payment', function (){
+				let id_land = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/payment-group/' + id_land + '/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						let html_edit = '<a href="#"><span id="edit" title="Редактировать" data-toggle="tooltip">' +
+														'<i class="far fa-edit"></i></span></a>'
+						let html_del = '<span data-toggle="modal" data-target="#msg-delete"><a href="#">' +
+								'<span id="trash" title="Удалить" data-toggle="tooltip">' +
+								'<i class="far fa-trash-alt"></i></span></a></span>'
+						let list = data.data;
+						for(let i=0; i<list.length; i++) {
+							let datePayment = new Date(Date.parse(list[i].date_payment));
+							let dt = $.datepicker.formatDate('dd.mm.yy', datePayment)
+							land_payments.row.add([list[i].pk, dt, list[i].type_payment, list[i].sum_payment,
+									html_edit, html_del]).draw()
+						}
+						$('[data-toggle="tooltip"]').tooltip();
+					},
+				});
+			});
+			land_payments.on('click', '#trash', function (){
+				let _this = $(this)
+				let id = $(this).closest('tr').children('td:first').text();
+				$('#modal-yes').prop('id', 'yes');
+				$('#yes').on('click', function() {
+					$.ajax({
+						url: '/app/payment/' + id + '/del',
+						type: 'GET',
+						dataType: 'json',
+						success: function(data) {
+							$('#msg-delete').modal('hide');
+						},
+						complete: function () {
+               _this.closest('tr').remove();
+						}
+					});
+			 	});
+			});
+			land_payments.on('click', '#edit', function() {
+				let id = $(this).closest('tr').children('td:first').text();
+				$.ajax({
+					url: '/app/payment/' + id + '/get',
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+            let list = JSON.parse(data.data);
+            let datePayment = new Date(Date.parse(list[0].fields.date_payment));
+
+						$('#modal-add-payment input[name="date_payment"]').val($.datepicker.formatDate('dd.mm.yy', datePayment));
+						$('#modal-add-payment input[name="sum_payment"]').val(list[0].fields.sum_payment);
+						$('#modal-add-payment input[name="comment"]').val(list[0].fields.comment);
+						$('#modal-add-payment input[name="fio"]').val(list[0].fields.fio);
+						$('#modal-add-payment select[name="land"]').val(list[0].fields.land).change();
+
+						$('<input>').attr({
+									type: 'hidden',
+									id: 'id_payment',
+									name: 'id_payment',
+									value: list[0].pk
+							}).appendTo('#form-add-payment');
+
+
+						$('#modal-add-payment').modal('show');
+					}
+				});
+      });
+			$('#modal-description-payment').on('hidden.bs.modal', function (e) {
+					window.location.href = '{% url 'app:payment_list' %}'
+			});
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+	</script>
+{% endblock %}

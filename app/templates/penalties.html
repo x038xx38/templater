@@ -1,0 +1,344 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+
+{#	<link rel="stylesheet" href="{% static "app/modals/card-box.css" %}" type="text/css" />#}
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.6.0/jszip-2.5.0/dt-1.11.3/af-2.3.7/b-2.1.1/b-colvis-2.1.1/b-html5-2.1.1/b-print-2.1.1/cr-1.5.5/date-1.1.1/fc-4.0.1/fh-3.2.0/kt-2.6.4/r-2.2.9/rg-1.1.4/rr-1.2.8/sc-2.0.5/sb-1.3.0/sp-1.4.0/sl-1.3.4/sr-1.0.1/datatables.min.css"/>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="{% static "app/modals/style.css" %}" type="text/css" />
+{% endblock %}
+{% block content %}
+<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+	<h3>{{ header }}</h3>
+
+	<ul class="nav nav-tabs" role="tablist">
+		<li class="nav-item text-uppercase">
+			<a class="nav-link active" id="protocol-tab" data-toggle="tab"
+						 href="#protocol" role="tab" aria-controls="protocol" aria-selected="false">Устав/Протокол</a>
+			</li>
+			<li class="nav-item text-uppercase">
+				<a class="nav-link" id="bank-rate-tab" data-toggle="tab"
+						 href="#bank-rate" role="tab" aria-controls="bank-rate" aria-selected="false">Ключевая ставка</a>
+			</li>
+			<li class="nav-item text-uppercase">
+				<a class="nav-link" id="calc-tab" data-toggle="tab"
+						 href="#calc" role="tab" aria-controls="calc" aria-selected="false">Калькулятор</a>
+			</li>
+	</ul>
+
+	<div class="tab-content p-1">
+		<div class="tab-pane pt-3 fade show active" id="protocol" role="tabpanel" aria-labelledby="protocol-tab">
+			<table id="penalty-list" class="table mt-4 table-sm text-muted table-bordered">
+				<thead>
+					<tr class="text-uppercase text-sm-center">
+						<th scope="col" class="w-50" style="border-bottom: 0px; text-align: center">На основании</th>
+						<th scope="col" class="w-25" style="border-bottom: 0px; text-align: center">Дата</th>
+						<th scope="col" style="border-bottom: 0px; text-align: center">Размер ставки</th>
+						<th style="width: 30px;"><span title="Приложение" data-toggle="tooltip">
+							<i class="fas fa-paperclip"></i></span></th>
+						<th style="width: 30px;"></th>
+						<th style="width: 30px;"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for data in penalty %}
+					<tr id="{{ data.id }}">
+						<td>{{ data.description }}</td>
+						<td>{{ data.date_start }}</td>
+						<td>{{ data.rate|floatformat:2 }}</td>
+						<td style="text-align: center">
+							{% if data.attachment %}
+								<a title="Скачать файл" data-toggle="tooltip" href="{{ MEDIA_URL }}{{ data.attachment }}" download>
+									<i class="fas fa-file-alt"></i></a>
+							{% endif %}
+						</td>
+						<td style="text-align: center"><span data-toggle="modal" data-target="#modal-penalty">
+							<a href="#" title="Редактировать запись" data-toggle="tooltip">
+							<span id="button-id-penalty-edit"><i class="far fa-edit"></i></span></a></span></td>
+						<td style="text-align: center"><span data-toggle="modal" data-target="#msg-delete">
+							<a href="#" title="Удалить запись" data-toggle="tooltip">
+								<span id="button-id-penalty-delete"><i class="far fa-trash-alt"></i></span></a></span></td>
+					</tr>
+					{%  endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div class="tab-pane pt-3 fade" id="bank-rate" role="tabpanel" aria-labelledby="bank-rate-tab">
+			<table id="rate-list" class="table mt-4 table-sm text-muted table-bordered">
+				<thead>
+					<tr>
+						<th scope="col" style="border-bottom: 0px; text-align: center" class="w-75">Период действия</th>
+						<th scope="col" style="border-bottom: 0px; text-align: center" class="w-25">Размер ключевой ставки (%)</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for data in bank_rate %}
+					<tr>
+							<td class="pl-3">c {{ data.st_date }} по {{ data.fn_date }}</td>
+							<td class="text-center">{{ data.rate|floatformat:2 }}</td>
+					</tr>
+					{%  endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div class="tab-pane pt-3 fade" id="calc" role="tabpanel" aria-labelledby="calc-tab">
+			<form>
+				<div class="form-group row">
+					<div class="col-sm-1"></div>
+					<label for="inputAmount" class="col-sm-3 col-form-label">Сумма задолженности: </label>
+					<div class="col-sm-3">
+						<div class="input-group mb-3">
+							<input type="text" class="form-control" aria-label="">
+							<div class="input-group-append">
+								<span class="input-group-text">руб.</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group row">
+					<div class="col-sm-1"></div>
+					<label for="inputRange" class="col-sm-3 col-form-label">Период задолженности: </label>
+					<div class="col-sm-3">
+						<input type="text" class="form-control" id="date_start" placeholder="">
+						<small id="passwordHelpBlock" class="form-text text-muted">
+								Начало периода
+						</small>
+					</div>
+					<div class="col-sm-3">
+						<input type="text" class="form-control" id="date_finish" placeholder="">
+						<small id="passwordHelpBlock" class="form-text text-muted">
+								Конец периода
+						</small>
+					</div>
+					<div class="col-sm-1"></div>
+					<div class="col-sm-1"></div>
+				</div>
+				<fieldset class="form-group m-0">
+					<div class="form-group row">
+						<div class="col-sm-1"></div>
+						<label for="inputRange" class="col-sm-3 col-form-label">Частичная оплата долга: </label>
+						<div class="col-sm-3">
+							<input type="text" class="form-control" id="date_pay" placeholder="">
+							<small id="passwordHelpBlock" class="form-text text-muted">
+									Дата внесения оплаты
+							</small>
+						</div>
+						<div class="col-sm-3">
+							<div class="input-group">
+								<input type="text" class="form-control" id="inputRange" placeholder="">
+								<div class="input-group-append">
+									<span class="input-group-text">руб.</span>
+								</div>
+							</div>
+							<small id="passwordHelpBlock" class="form-text text-muted">
+								Сумма оплаты
+							</small>
+						</div>
+						<div class="col-sm-1 pt-2">
+							<a href="#"><span id=""><i class="fas fa-plus fa-lg"></i></span></a>&nbsp;&nbsp;
+							<a href="#"><span id=""><i class="fas fa-minus fa-lg"></i></span></a>
+						</div>
+						<div class="col-sm-1"></div>
+					</div>
+				</fieldset>
+				<fieldset class="form-group m-0">
+					<div class="form-group row">
+						<div class="col-sm-1"></div>
+						<label for="inputRange" class="col-sm-3 col-form-label">Увеличение долга: </label>
+						<div class="col-sm-3">
+							<input type="text" class="form-control" id="date_duty" placeholder="">
+							<small id="passwordHelpBlock" class="form-text text-muted">
+									Дата увеличения долга
+							</small>
+						</div>
+						<div class="col-sm-3">
+							<div class="input-group">
+								<input type="text" class="form-control" id="inputRange" placeholder="">
+								<div class="input-group-append">
+									<span class="input-group-text">руб.</span>
+								</div>
+							</div>
+							<small id="passwordHelpBlock" class="form-text text-muted">
+								Сумма долга
+							</small>
+						</div>
+						<div class="col-sm-1 pt-2">
+							<a href="#"><span id=""><i class="fas fa-plus fa-lg"></i></span></a>&nbsp;&nbsp;
+							<a href="#"><span id=""><i class="fas fa-minus fa-lg"></i></span></a>
+						</div>
+						<div class="col-sm-1"></div>
+					</div>
+				</fieldset>
+				<div class="form-group row">
+					<div class="col-sm-1"></div>
+					<div class="col-sm-10 mt-3">
+						<button type="submit" style="width: 150px;" class="btn btn-primary float-right">
+							<i class="fas fa-calculator"></i>&nbsp;&nbsp;Рассчитать</button>
+						<button type="submit" style="width: 150px;" class="btn btn-primary float-right mr-3">
+							<i class="fas fa-eraser"></i>&nbsp;&nbsp;Очистить</button>
+					</div>
+					<div class="col-sm-1"></div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- modal penalty -->
+	<div class="modal modal_outer first_modal fade" id="modal-penalty" tabindex="-1" role="dialog"
+		 aria-labelledby="modal-penalty" aria-hidden="true" >
+		<div class="modal-dialog">
+			<form method="post" action="/app/penalties"  enctype="multipart/form-data" id="form-create-penalty">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title"></h3>
+						<button type="button" class="close" data-dismiss="modal" aria-label="close">
+							<i class="fas fa-times"></i></button>
+					</div>
+					<div class="modal-body">
+						{% crispy form_penalty %}
+					</div>
+					<div class="modal-footer">
+						<button type="reset" class="btn btn-dark mr-auto" data-dismiss="modal">
+							<i class="fas fa-window-close"></i>&nbsp;&nbsp;Закрыть</button>
+						<button type="submit" class="btn btn-primary" name="save-penalty" id="button-id-penalty-save">
+							<i class="fas fa-save"></i>&nbsp;&nbsp;Сохранить</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<!-- modal penalty -->
+	<!-- modal delete info message -->
+	<div class="modal fade" id="msg-delete" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header border-bottom-0">
+					<h5 class="modal-title"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+				<div class="modal-body text-center mt-4 mb-4">
+					<h5>Вы действительно хотите удалить запись?</h5>
+				</div>
+				<div class="modal-footer border-top-0">
+					<button type="button" class="btn btn-secondary mr-auto" style="width: 120px;" data-dismiss="modal">Нет</button>
+					<button type="button" class="btn btn-primary float-right" style="width: 120px;" id="modal-yes">Да</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- modal delete info message -->
+
+</div>
+{% endblock %}
+{% block scripts %}
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+
+	<script>
+		/* Локализация datepicker */
+		$.datepicker.regional['ru'] = {
+				monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+				dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+				dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+
+				dateFormat: 'dd.mm.yy',
+				firstDay: 1,
+				{#isRTL: false,#}
+				showMonthAfterYear: false,
+				{#yearSuffix: ''#}
+		 };
+		$.datepicker.setDefaults($.datepicker.regional['ru']);
+
+		{#$.fn.dataTable.ext.classes.sLengthSelect = 'form-control form-control';#}
+		{#$.fn.DataTable.ext.classes.sFilterInput = "form-control form-control-lg";#}
+		{#$.fn.dataTable.ext.classes.sPaging = 'dataTables_paginate pagination-sm';#}
+		$(document).ready( function () {
+			$('#penalty-list').DataTable({
+				dom: 	"<'row'<'col-sm-12 col-md-10'><'col-sm-12 col-md-2'B>>" +
+							"<'row'<'col-sm-12'tr>>",
+				language: {
+      		emptyTable: "Нет записей в справочнике"
+    		},
+				buttons: [{
+					text: '<span title=\'Новая запись\' data-toggle=\'tooltip\'>' +
+							'<i class=\'fas fa-plus-circle\'></i> Создать протокол</span>',
+					className: 'btn btn-primary btn-sm float-right',
+					attr: {
+							id: 'button-id-penalty-create',
+							'data-toggle': 'modal',
+							'data-target': '#modal-penalty',
+						}
+				}],
+				ordering: false,
+			});
+			$('#rate-list').DataTable({
+				"dom": 	"<'row'<'col-sm-12 col-md-12'l>>" +
+								"<'row'<'col-sm-12'tr>>" +
+								"<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 pt-2'p>>",
+
+				language: {
+					"paginate": {
+						"first": "Первая",
+						"previous": '<i class="fas fa-angle-double-left"></i>',
+						"next": '<i class="fas fa-angle-double-right"></i>',
+						"last": "Последняя"
+					},
+					"info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+					"infoEmpty": "Записи с 0 до 0 из 0 записей",
+					"processing": "Подождите...",
+					"search": "Поиск:",
+					"lengthMenu": "Показать _MENU_ записей",
+				},
+
+				"ordering": false,
+				"searching": false
+			});
+			$('.dataTables_paginate').addClass('pagination-sm');
+			$('[data-toggle="tooltip"]').tooltip();
+
+			$('#id_date_start').datepicker({
+				dateFormat: 'dd.mm.yy'
+			});
+			// calculator
+			$('#date_start, #date_finish, #date_duty, #date_pay').datepicker({
+				dateFormat: 'dd.mm.yy'
+			});
+
+			$('tr #button-id-penalty-delete').on('click', function (){
+				let id_penalty = $(this).closest('tr').attr('id');
+				$('#modal-yes').on('click', function() {
+						$.get('/app/penalties/' + id_penalty + '/del', function(data){
+							window.location.href = '{% url 'app:penalties' %}'
+						});
+				 });
+			});
+			$('tr #button-id-penalty-edit').on('click', function (){
+				let id_penalty = $(this).closest('tr').attr('id');
+				$.ajax({
+					url: '/app/penalties/' + id_penalty + '/get' ,
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+							let dateStart = new Date(Date.parse(data.date_start));
+							$('#modal-penalty .modal-title').text('Редактирование записи');
+							$('#modal-penalty input[name="description"]').val(data.description);
+							$('#modal-penalty input[name="date_start"]').val($.datepicker.formatDate('dd.mm.yy', dateStart));
+							$('#modal-penalty input[name="rate"]').val(data.rate);
+							$('#modal-penalty .custom-file-label').text(data.attachment);
+							$('<input>').attr({type: 'hidden', id: 'id_penalty', name: 'id_penalty', value: data.id}).appendTo('#form-create-penalty');
+					},
+				});
+			});
+			$('#button-id-penalty-create').on('click', function (){
+				$('#modal-penalty .modal-title').text('Создание записи');
+			});
+
+		});
+	</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+		<div class="d-block w-100 pr-5 pl-5 pb-5 pt-0">
+    <h3>Сводка</h3>
+    <div class="row equal">
+        <div class="card m-3 h-50" style="width: 25rem;">
+          <h5 class="card-header">Количество должников</h5>
+          <div class="card-body text-center">
+            <p class="card-text font-weight-bold display-4">{{ debtors.count }}</p>
+          </div>
+        </div>
+
+        <div class="card m-3 h-50" style="width: 25rem;">
+          <h5 class="card-header">Количество участков</h5>
+          <div class="card-body text-center">
+            <p class="card-text font-weight-bold display-4">{{ lands.count }}</p>
+          </div>
+        </div>
+
+        <div class="card m-3 h-50" style="width: 25rem;">
+          <h5 class="card-header">Сумма задолженностей</h5>
+          <div class="card-body text-center">
+            <p class="card-text font-weight-bold display-4">{{ amount_debt }}</p>
+          </div>
+        </div>
+
+        <div class="card m-3 h-50" style="width: 25rem;">
+          <h5 class="card-header">Претензии</h5>
+          <div class="card-body text-center">
+            <p class="card-text font-weight-bold display-4">{{ pretrial.count }}</p>
+          </div>
+        </div>
+
+        <div class="card m-3 h-50" style="width: 25rem;">
+          <h5 class="card-header">Исковые зявления</h5>
+          <div class="card-body text-center">
+            <p class="card-text font-weight-bold display-4">{{ isk1.count }}</p>
+          </div>
+        </div>
+
+        <div class="card m-3 h-50" style="width: 25rem;">
+          <h5 class="card-header">Судебные приказы</h5>
+          <div class="card-body text-center">
+            <p class="card-text font-weight-bold display-4">{{ isk2.count }}</p>
+          </div>
+        </div>
+
+{% endblock %}
