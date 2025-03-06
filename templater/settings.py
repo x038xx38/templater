@@ -156,7 +156,7 @@ LOGIN_REDIRECT_URL = '/app/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #SPATIALITE_LIBRARY_PATH='/usr/local/lib/mod_spatialite.dylib'   # настройка для macbook
-SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+SPATIALITE_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libspatialite.so'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
